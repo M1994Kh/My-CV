@@ -8,8 +8,10 @@ hr  {
     border-color: grey;
     border-width: 7px;
 }
+h1  {
+    color:66bfbf;
 h3  {
-    color: #FF4A4A;
+    color: #66bfbf;
     width: 7%;
     margin: auto ;
     padding: auto;
