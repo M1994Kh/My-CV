@@ -1,0 +1,25 @@
+body    {
+    background-color: #EAF6F6;
+    font-family:Arial, Helvetica, sans-serif;
+}
+hr  {
+    border-style: dotted none none none;
+    width: 5%;
+    border-color: grey;
+    border-width: 7px;
+}
+h3  {
+    color: #FF4A4A;
+    width: 7%;
+    margin: auto ;
+    padding: auto;
+    text-align: center;
+    font-size: 2rem;
+}
+#profile_picture    {
+    border-radius: 50%;
+    width:100%;
+}
+#img    {
+    width: 20%;
+}
