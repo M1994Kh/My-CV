@@ -126,9 +126,12 @@ h1  {
     color: #66bfbf;
     text-shadow: 2px 2px 8px #000000;
     font-size: 4vw;
+    
 }
 h2  {
     font-size: 2vw;
+    font-family: 'Dancing Script', cursive;
+    font-family: 'Nova Slim', cursive;
 }
 h3  {
     font-size: 1.75vw;
