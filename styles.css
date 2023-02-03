@@ -111,6 +111,7 @@ body    {
 }   
 p   {
     font-size: 1.75vw;
+    font-family: 'Montserrat Alternates', sans-serif;
 
 }
 ol  {
@@ -128,9 +129,11 @@ h1  {
     font-size: 4vw;
     
 }
+/* font-family: 'Josefin Sans', sans-serif;
+font-family: 'Montserrat Alternates', sans-serif; */
 h2  {
     font-size: 2vw;
-    font-family: 'Montserrat Alternates', sans-serif;
+    font-family: 'Josefin Sans', sans-serif;
 }
 h3  {
     font-size: 1.75vw;
