@@ -251,6 +251,10 @@ footer{text-align:center;color:var(--muted);font-size:13px}
         </div>
       </div>
       <div class="field">
+        <label for="accent">English</label>
+        <select id="accent"><option value="en-US" selected>American (US)</option><option value="en-GB">British (UK)</option></select>
+      </div>
+      <div class="field">
         <label for="voice">Voice</label>
         <select id="voice"></select>
       </div>
@@ -335,9 +339,9 @@ const store = {
 
 /* ---------- Preset material ---------- */
 const PRESETS = {
-  "Commonly misspelled": "accommodate\nachieve\nacquire\napparent\nargument\nbeginning\nbelieve\nbusiness\ncalendar\ncommittee\nconscience\nconscious\ndefinitely\nembarrass\nenvironment\nexaggerate\nforeign\ngovernment\nguarantee\nharass\nimmediately\nindependent\nknowledge\nlibrary\nmaintenance\nnecessary\nneighbour\noccasion\noccurrence\nparliament\npossession\nprivilege\npronunciation\nrecommend\nreceive\nrhythm\nseparate\nsuccessful\ntomorrow\nuntil",
-  "IELTS Listening": "accommodation\napplication\nappointment\naudience\nbeverage\nbrochure\ncampus\ncertificate\ncommunity\ncompetition\nconference\ndeposit\ndepartment\ndisabled\nenrolment\nequipment\nfacilities\nfortnight\nheadquarters\ninsurance\ninterview\nlaboratory\nlecture\nmaintenance\nmembership\nmuseum\nnationality\nparticipant\npassport\nqualification\nquestionnaire\nreceptionist\nreference\nreservation\nsecondary\nsemester\nsignature\nsupervisor\ntemperature\nvolunteer\nWednesday\nFebruary",
-  "Mining & processing": "aggregate\nbeneficiation\ncathode\nconcentrate\nconveyor\ncrusher\ncyclone\ndewatering\nelectrolyte\nelectrowinning\nflotation\ngangue\ngeotechnical\ngrinding\nhaulage\nhydrometallurgy\nleaching\nlimestone\nmetallurgical\nore\noverburden\nraffinate\nreagent\nrecovery\nscreening\nsolvent extraction\nstockpile\nsulphide\ntailings\nthickener\nventilation",
+  "Commonly misspelled": "accommodate\nachieve\nacquire\napparent\nargument\nbeginning\nbelieve\nbusiness\ncalendar\ncommittee\nconscience\nconscious\ndefinitely\nembarrass\nenvironment\nexaggerate\nforeign\ngovernment\nguarantee\nharass\nimmediately\nindependent\nknowledge\nlibrary\nmaintenance\nnecessary\nneighbor\noccasion\noccurrence\nparliament\npossession\nprivilege\npronunciation\nrecommend\nreceive\nrhythm\nseparate\nsuccessful\ntomorrow\nuntil",
+  "IELTS Listening": "accommodation\napplication\nappointment\naudience\nbeverage\nbrochure\ncampus\ncertificate\ncommunity\ncompetition\nconference\ndeposit\ndepartment\ndisabled\nenrollment\nequipment\nfacilities\nfortnight\nheadquarters\ninsurance\ninterview\nlaboratory\nlecture\nmaintenance\nmembership\nmuseum\nnationality\nparticipant\npassport\nqualification\nquestionnaire\nreceptionist\nreference\nreservation\nsecondary\nsemester\nsignature\nsupervisor\ntemperature\nvolunteer\nWednesday\nFebruary",
+  "Mining & processing": "aggregate\nbeneficiation\ncathode\nconcentrate\nconveyor\ncrusher\ncyclone\ndewatering\nelectrolyte\nelectrowinning\nflotation\ngangue\ngeotechnical\ngrinding\nhaulage\nhydrometallurgy\nleaching\nlimestone\nmetallurgical\nore\noverburden\nraffinate\nreagent\nrecovery\nscreening\nsolvent extraction\nstockpile\nsulfide\ntailings\nthickener\nventilation",
   "Short passage": "The heap leaching process begins when crushed ore is stacked on a lined pad. A dilute acid solution is then applied to the surface of the heap. As the solution moves through the ore, it dissolves the copper minerals. The pregnant solution is collected at the base and pumped to the extraction plant. Careful control of the flow rate improves the overall recovery."
 };
 
@@ -402,12 +406,16 @@ function loadVoices(){
   if (!voices.length) voices = synth.getVoices();
   const sel = $('voice'), saved = store.get('voice', '');
   sel.innerHTML = '';
-  const rank = v => (/natural|neural|online/i.test(v.name)?0:1) + (/en-GB/i.test(v.lang)?0:0.5);
+  const want = $('accent').value.toLowerCase();
+  const rank = v => (v.lang.replace('_','-').toLowerCase() === want ? 0 : 2) + (/natural|neural|online/i.test(v.name)?0:1);
   voices.sort((a,b) => rank(a)-rank(b) || a.name.localeCompare(b.name));
   voices.forEach((v,i) => { const o = document.createElement('option'); o.value = v.name; o.textContent = `${v.name.replace(/^Microsoft |^Google /,'')} (${v.lang})`; sel.appendChild(o) });
-  if (saved && voices.some(v => v.name === saved)) sel.value = saved;
+  const okSaved = saved && voices.some(v => v.name === saved && v.lang.replace('_','-').toLowerCase() === want);
+  if (okSaved) sel.value = saved;
   $('voiceWarn').textContent = voices.length ? '' : 'No voices found yet. They may load after a moment.';
 }
+$('accent').value = store.get('accent', 'en-US');
+$('accent').onchange = () => { store.set('accent', $('accent').value); store.set('voice', ''); loadVoices(); };
 if (synth) { loadVoices(); synth.onvoiceschanged = loadVoices }
 $('voice').onchange = () => store.set('voice', $('voice').value);
 
@@ -431,7 +439,7 @@ function speak(text, {rateMul = 1, times = 1, letters = false, onLetter = null} 
       if (idx >= parts.length) { btn.classList.remove('talking'); onLetter && onLetter(-1); return resolve() }
       const p = parts[idx++];
       const u = new SpeechSynthesisUtterance(p.t);
-      if (voice) { u.voice = voice; u.lang = voice.lang } else u.lang = 'en-GB';
+      if (voice) { u.voice = voice; u.lang = voice.lang } else u.lang = $('accent').value;
       u.rate = Math.max(0.3, Number(rate.value) * rateMul * (letters ? 0.9 : 1));
       u.onstart = () => onLetter && p.i !== undefined && onLetter(p.i);
       u.onend = () => setTimeout(next, letters ? 90 : (idx < parts.length ? 650 : 0));
@@ -780,14 +788,17 @@ async function generateWords(){
   const n = Number($('aiCount').value), level = $('aiLevel').value, sent = unit === 'sentence';
   const seen = getSeen();
   const avoid = seen.slice(-300).join(', ');
+  const us = $('accent').value === 'en-US';
+  const spellName = us ? 'American English' : 'British English';
+  const spellEx = us ? 'e.g. color, center, organize, traveled, program, defense' : 'e.g. colour, centre, organise, travelled, programme, defence';
   const prompt = sent
-    ? `Write ${n} natural English sentences for dictation practice at CEFR ${level} level on the topic "${topic}". Each sentence is 7 to 16 words and contains at least one word that learners often misspell from hearing. Use British spelling. Avoid sentences built around these already-practised words: ${avoid || 'none'}.\nReturn ONLY a JSON array of strings.`
-    : `List ${n} English words or short fixed phrases for spelling dictation at CEFR ${level} level on the topic "${topic}". Choose words that are useful and easy to misspell from hearing (silent letters, double consonants, tricky vowels, -ible/-able, -ance/-ence). Mix lengths. Use British spelling. No proper names unless the topic needs them. Do NOT include any of these already-practised words: ${avoid || 'none'}.\nReturn ONLY a JSON array of strings, like ["word","word"].`;
+    ? `Write ${n} natural English sentences for dictation practice at CEFR ${level} level on the topic "${topic}". Each sentence is 7 to 16 words and contains at least one word that learners often misspell from hearing. Use ${spellName} spelling and vocabulary only. Avoid sentences built around these already-practised words: ${avoid || 'none'}.\nReturn ONLY a JSON array of strings.`
+    : `List ${n} English words or short fixed phrases for spelling dictation at CEFR ${level} level on the topic "${topic}". Choose words that are useful and easy to misspell from hearing (silent letters, double consonants, tricky vowels, -ible/-able, -ance/-ence). Mix lengths. Use ${spellName} spelling only (${spellEx}). No proper names unless the topic needs them. Do NOT include any of these already-practised words: ${avoid || 'none'}.\nReturn ONLY a JSON array of strings, like ["word","word"].`;
   btn.disabled = true;
   aiStatus(`<span class="spin"></span> Asking ${PROVIDERS[aiProv.value].name} for ${n} new ${sent ? 'sentences' : 'words'}…`, 'wait');
   try {
     const text = await callLLM([
-      { role:'system', content:'You create vocabulary for English dictation and spelling practice. You always answer with a JSON array of strings and nothing else.' },
+      { role:'system', content:'You create vocabulary for English dictation and spelling practice, strictly following the requested spelling standard (American or British). You always answer with a JSON array of strings and nothing else.' },
       { role:'user', content: prompt }
     ]);
     const have = new Set(seen.map(s => s.toLowerCase()));
