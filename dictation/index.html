@@ -8,7 +8,7 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2747d6">
-<meta name="description" content="Dictation trainer: listen, type what you hear, and re-learn every word you misspell. Fresh word lists from AI.">
+<meta name="description" content="Dictation and IELTS Speaking trainer: listen and spell, or sit a speaking test with an AI examiner and get a band-score report.">
 <title>Dictation Drill</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -171,6 +171,122 @@ footer{text-align:center;color:var(--muted);font-size:13px}
 .key.down{transform:translateY(1px);filter:brightness(.92)}
 .key svg{width:24px;height:24px}
 
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:4px;align-self:flex-start;box-shadow:var(--shadow)}
+.tab{font:700 15px var(--f-body);color:var(--muted);text-decoration:none;padding:9px 16px;border-radius:9px}
+.tab[aria-current="page"]{background:var(--cobalt);color:var(--sheet)}
+.tab:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
+.appview{display:flex;flex-direction:column;gap:20px}
+
+/* Speaking: home */
+.miccheck{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.meter{flex:1;min-width:120px;max-width:260px;height:10px;border-radius:99px;background:var(--rule);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--good);transition:width .08s linear}
+.hist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-top:1px solid var(--rule)}
+.hist li{display:flex;align-items:center;gap:12px;padding:10px 2px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.hist .bandpill{font:800 18px var(--f-display);min-width:52px;text-align:center;background:var(--cobalt-soft);color:var(--cobalt);border-radius:8px;padding:4px 8px;font-variant-numeric:tabular-nums}
+.hist .hmeta{flex:1;min-width:0}
+.hist .hmeta b{display:block;font-size:15px}
+
+/* Flashcards */
+.deck{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.fc{perspective:1200px;min-width:0}
+.fc .inner{display:grid;transition:transform .5s;transform-style:preserve-3d;height:100%}
+.fc.flip .inner{transform:rotateY(180deg)}
+.face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:1px solid var(--rule);border-radius:12px;padding:14px;background:var(--sheet);display:flex;flex-direction:column;gap:8px;min-height:170px;cursor:pointer}
+.face.back{transform:rotateY(180deg);background:var(--paper)}
+.face h3{font:700 17px/1.3 var(--f-display);margin:0;text-wrap:balance}
+.face ul{margin:0;padding-left:18px;font-size:14px;display:flex;flex-direction:column;gap:3px}
+.face .tag{font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--cobalt)}
+.face .tag.p2{color:var(--marker-ink);background:var(--marker);align-self:flex-start;padding:1px 6px;border-radius:4px}
+.face .tag.ai{color:var(--good)}
+.face .fcfoot{margin-top:auto;display:flex;gap:8px;align-items:center;justify-content:space-between}
+.face .small{font-size:12.5px;color:var(--muted)}
+.btn-sm{padding:7px 12px;font-size:13.5px;border-radius:8px}
+@media (prefers-reduced-motion:reduce){.fc .inner{transition:none}}
+
+/* Exam */
+.steps{display:flex;gap:6px}
+.steps span{flex:1;font:600 11.5px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;text-align:center;color:var(--muted);border-top:4px solid var(--rule);padding-top:6px}
+.steps span.on{color:var(--cobalt);border-color:var(--cobalt)}
+.steps span.done{color:var(--good);border-color:var(--good)}
+.examiner{display:flex;gap:14px;align-items:flex-start}
+.avatar{flex:none;width:64px;height:64px;border-radius:50%;background:var(--cobalt-soft);color:var(--cobalt);display:grid;place-items:center;position:relative}
+.avatar svg{width:60%;height:60%}
+.avatar.talking::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--cobalt);animation:ring 1s ease-out infinite}
+.bubble{flex:1;min-width:0;background:var(--paper);border:1px solid var(--rule);border-radius:4px 14px 14px 14px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+#exSay{font-size:18px;line-height:1.45}
+#exSay.hiddenq{color:var(--muted);font-style:italic;font-size:15px}
+.cue{border:2px solid var(--ink);border-radius:6px;padding:16px 18px;background:var(--sheet);box-shadow:4px 4px 0 var(--rule);display:flex;flex-direction:column;gap:6px}
+.cue h3{font:700 19px/1.3 var(--f-display);margin:0}
+.cue ul{margin:0;padding-left:20px}
+.cue .say{font-size:13.5px;color:var(--muted)}
+.prep{display:flex;flex-direction:column;gap:10px}
+.prephead{display:flex;justify-content:space-between;align-items:baseline}
+.prephead b{font:800 26px var(--f-display);font-variant-numeric:tabular-nums}
+#exNotes{min-height:90px}
+.recbar{border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--paper)}
+.recstate{display:flex;align-items:center;gap:10px;font-weight:700;flex-wrap:wrap}
+.dotrec{width:12px;height:12px;border-radius:50%;background:var(--muted)}
+.dotrec.on{background:var(--bad);animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.3}}
+.bars{display:flex;align-items:center;gap:3px;height:44px}
+.bars i{flex:1;background:var(--cobalt);border-radius:2px;height:6%;min-height:2px;opacity:.85;transition:height .1s}
+.live{font-size:15px;color:var(--ink);max-height:7.5em;overflow-y:auto;line-height:1.5}
+.live .interim{color:var(--muted)}
+
+/* Report */
+.rhero{display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:center}
+.plate{width:132px;height:132px;border-radius:20px;background:var(--cobalt);color:var(--sheet);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.plate b{font:800 54px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.plate span{font:600 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.crit{display:flex;flex-direction:column;gap:10px}
+.crow{display:grid;grid-template-columns:minmax(0,11em) minmax(0,1fr) 2.6em;gap:10px;align-items:center;font-size:14px}
+.track{height:12px;border-radius:99px;background:var(--rule);position:relative;overflow:hidden}
+.track i{position:absolute;inset:0 auto 0 0;background:var(--cobalt);border-radius:99px}
+.crow b{font:800 17px var(--f-display);text-align:right;font-variant-numeric:tabular-nums}
+.scale{display:grid;grid-template-columns:minmax(0,11em) minmax(0,1fr) 2.6em;gap:10px;font:11px var(--f-mono);color:var(--muted)}
+.scale div{display:flex;justify-content:space-between}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.mtile{border:1px solid var(--rule);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.mtile b{font:800 24px/1.1 var(--f-display);font-variant-numeric:tabular-nums}
+.mtile span{font-size:12.5px;color:var(--muted)}
+.mtile em{font-style:normal;font-size:12px;font-weight:700}
+.mtile em.good{color:var(--good)} .mtile em.warn{color:var(--marker-ink);background:var(--marker);align-self:flex-start;padding:0 5px;border-radius:4px} .mtile em.bad{color:var(--bad)}
+.rsec{display:flex;flex-direction:column;gap:10px}
+.rsec h3{font:700 18px var(--f-display);margin:0}
+.rsec p{margin:0;max-width:70ch}
+.critnotes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.cn{border:1px solid var(--rule);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.cn h4{margin:0;font:700 15px var(--f-body);display:flex;justify-content:space-between;gap:8px}
+.cn ul{margin:0;padding-left:18px;font-size:14px;color:var(--muted)}
+.mlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-top:1px solid var(--rule)}
+.mlist li{padding:12px 2px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:4px}
+.mlist .mt{font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--cobalt)}
+.mlist .said{font-family:var(--f-mono);font-size:14.5px;color:var(--bad);text-decoration:line-through;text-decoration-thickness:1px;overflow-wrap:anywhere}
+.mlist .better{font-family:var(--f-mono);font-size:14.5px;color:var(--good);font-weight:600;overflow-wrap:anywhere}
+.mlist .why{font-size:14px;color:var(--muted)}
+.vocab{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.vocab div{border:1px solid var(--rule);border-radius:10px;padding:10px 12px;font-size:14px;min-width:0}
+.vocab .from{font-family:var(--f-mono);color:var(--muted)}
+.vocab .to{font-family:var(--f-mono);font-weight:700;color:var(--cobalt)}
+.qa details{border:1px solid var(--rule);border-radius:12px;padding:10px 14px;background:var(--sheet)}
+.qa details+details{margin-top:8px}
+.qa summary{cursor:pointer;font-weight:700;display:flex;gap:10px;align-items:baseline}
+.qa summary .qn{font:600 12px var(--f-mono);color:var(--muted);flex:none}
+.qa .tr{font-size:15px;background:var(--paper);border-radius:8px;padding:10px 12px;margin:10px 0 6px;overflow-wrap:anywhere}
+.qa audio{width:100%;max-width:420px;height:36px}
+.qa .qm{font-size:12.5px;color:var(--muted);font-family:var(--f-mono)}
+.plan{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px}
+.plan li b{display:block}
+.model{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:14px;font-size:15px;white-space:pre-wrap;overflow-wrap:anywhere}
+.caveat{font-size:13px;color:var(--muted);border-top:1px solid var(--rule);padding-top:10px}
+.marking{display:flex;flex-direction:column;align-items:center;gap:12px;padding:30px 0;text-align:center}
+.marking .spin{width:34px;height:34px;border-width:3px;color:var(--cobalt)}
+@media (max-width:520px){.rhero{grid-template-columns:1fr;justify-items:start}.plate{width:110px;height:110px}.plate b{font-size:44px}
+  .crow,.scale{grid-template-columns:minmax(0,7.5em) minmax(0,1fr) 2.4em}.examiner .avatar{width:48px;height:48px}#exSay{font-size:16.5px}}
+@media print{.tabs,footer,#spkHome,#spkDeckSec,#spkHistSec,.noprint{display:none!important}body{background:#fff}.sheet{box-shadow:none;border:0}}
+
 /* Split screen while drilling on a touch device */
 body.drilling{overflow:hidden}
 body.drilling #drill{position:fixed;left:0;right:0;top:var(--vvtop,0px);height:var(--vvh,100dvh);z-index:30;margin:0;border:0;border-radius:0;box-shadow:none;padding:0;gap:0;display:flex;flex-direction:column}
@@ -210,10 +326,16 @@ body.drilling .study{padding:0}
       <svg class="logo" viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3556e8"/><stop offset="1" stop-color="#1c34a8"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#lg)"/><g stroke="#fff" stroke-opacity=".1" stroke-width="6"><line x1="64" y1="150" x2="448" y2="150"/><line x1="64" y1="226" x2="448" y2="226"/><line x1="64" y1="302" x2="448" y2="302"/></g><path d="M104 196h44l58-48c8-6 18-1 18 9v170c0 10-10 15-18 9l-58-48h-44c-8 0-14-6-14-14v-64c0-8 6-14 14-14z" fill="#fff"/><g fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"><path d="M266 196a64 64 0 0 1 0 92"/><path d="M312 156a122 122 0 0 1 0 172" stroke-opacity=".75"/></g><rect x="374" y="148" width="24" height="188" rx="12" fill="#ffe266"/><rect x="90" y="378" width="308" height="30" rx="15" fill="#ffe266"/></svg>
       <div class="txt">
         <h1>Dictation Drill<span class="dot">.</span></h1>
-        <p>Listen, type what you hear, and move on only when the spelling is right. Every word you miss comes back at the end for a second lesson.</p>
+        <p id="brandSub">Listen, type what you hear, and move on only when the spelling is right. Every word you miss comes back at the end for a second lesson.</p>
       </div>
     </div>
   </header>
+
+  <nav class="tabs" id="tabs" aria-label="Sections">
+    <a href="#dictation" class="tab" data-tab="dictation" aria-current="page">✎ Dictation</a>
+    <a href="#speaking" class="tab" data-tab="speaking">🎙 Speaking</a>
+  </nav>
+  <div id="dictApp" class="appview">
 
   <!-- SETUP -->
   <section class="sheet" id="setup">
@@ -395,7 +517,127 @@ body.drilling .study{padding:0}
     </div>
   </section>
 
-  <footer>Uses your browser's built-in voices. Chrome and Edge have the most natural English voices.</footer>
+  </div>
+<div id="spkApp" class="appview" hidden>
+  <!-- SPEAKING HOME -->
+  <section class="sheet" id="spkHome">
+    <div><div class="eyebrow">IELTS Speaking · examiner mode</div><h2>Sit a speaking test</h2></div>
+    <p class="meta" style="margin:0">The examiner asks the questions out loud and records your answers. When you finish, it transcribes and marks the test against the four IELTS criteria and writes you a full report.</p>
+    <div class="field">
+      <label>Test</label>
+      <div class="seg" id="spkModeSeg">
+        <button type="button" data-mode="full" aria-pressed="true">Full test</button>
+        <button type="button" data-mode="p1" aria-pressed="false">Part 1</button>
+        <button type="button" data-mode="p2" aria-pressed="false">Part 2</button>
+        <button type="button" data-mode="p3" aria-pressed="false">Part 3</button>
+      </div>
+      <div class="meta" id="spkModeInfo"></div>
+    </div>
+    <div class="grid">
+      <div class="field">
+        <label for="spkVoice">Examiner voice</label>
+        <select id="spkVoice"></select>
+      </div>
+      <div class="field">
+        <label for="spkEngine">Transcription</label>
+        <select id="spkEngine">
+          <option value="browser">Browser speech recognition (free, live)</option>
+          <option value="groq">Groq Whisper (free key, more accurate)</option>
+        </select>
+      </div>
+    </div>
+    <div class="toggles">
+      <label><input type="checkbox" id="spkShowQ" checked> Show question text</label>
+      <label><input type="checkbox" id="spkLive" checked> Show live transcript</label>
+      <label><input type="checkbox" id="spkAutoStop" checked> Move on after a long silence</label>
+    </div>
+    <div class="note" id="spkEngineNote"></div>
+    <div class="miccheck">
+      <button class="btn btn-ghost" id="micTest" type="button">🎙 Check microphone</button>
+      <div class="meter" id="micMeter" aria-hidden="true"><i></i></div>
+      <span class="meta" id="micMsg"></span>
+    </div>
+    <div class="row">
+      <button class="btn btn-primary" id="spkStart" type="button">▶ Start the test</button>
+      <span class="meta" id="spkAiInfo"></span>
+      <button class="linkbtn" id="spkAiSet" type="button">AI settings</button>
+    </div>
+    <div class="status" id="spkStatus" role="status"></div>
+  </section>
+
+  <!-- FLASHCARDS -->
+  <section class="sheet" id="spkDeckSec">
+    <div class="drillhead">
+      <div><div class="eyebrow">Question source</div><h2>Speaking flashcards</h2></div>
+      <span class="count" id="deckCount"></span>
+    </div>
+    <p class="meta" style="margin:0">Tests are built from these cards. Tap a card to flip it, or practise one card on its own.</p>
+    <div class="row">
+      <div class="presets" id="deckFilter">
+        <button type="button" class="chip" data-f="all" aria-pressed="true">All</button>
+        <button type="button" class="chip" data-f="p1" aria-pressed="false">Part 1 topics</button>
+        <button type="button" class="chip" data-f="p2" aria-pressed="false">Part 2 &amp; 3 cue cards</button>
+        <button type="button" class="chip" data-f="new" aria-pressed="false">AI &amp; my cards</button>
+      </div>
+    </div>
+    <div class="deck" id="deck"></div>
+    <div class="row">
+      <button class="btn btn-ghost" id="deckMore" type="button" hidden>Show more cards</button>
+      <span class="spacer"></span>
+      <button class="btn btn-ghost" id="deckAi" type="button">✦ New cards from AI</button>
+      <button class="btn btn-ghost" id="deckAddT" type="button" aria-expanded="false">Add my own</button>
+    </div>
+    <div class="status" id="deckStatus" role="status"></div>
+    <div class="field" id="deckAddBox" hidden>
+      <label for="deckAdd">Paste your cards <span class="meta">(leave a blank line between cards)</span></label>
+      <textarea id="deckAdd" spellcheck="false" placeholder="Topic: Coffee&#10;Do you drink coffee?&#10;When do you usually drink it?&#10;&#10;Describe a teacher who helped you&#10;- who this teacher was&#10;- what subject they taught&#10;- what they did for you&#10;and explain why you remember them&#10;Part 3:&#10;What makes a good teacher?&#10;Will computers replace teachers?"></textarea>
+      <div class="row"><button class="btn btn-primary" id="deckAddGo" type="button">Add cards</button><span class="meta">A card starting with “Describe” becomes a Part 2 cue card; lines after “Part 3:” become its follow-up questions.</span></div>
+    </div>
+  </section>
+
+  <!-- HISTORY -->
+  <section class="sheet" id="spkHistSec" hidden>
+    <div><div class="eyebrow">Your progress</div><h2>Past reports</h2></div>
+    <ul class="hist" id="spkHist"></ul>
+  </section>
+
+  <!-- EXAM -->
+  <section class="sheet exam" id="spkExam" hidden>
+    <div class="drillhead">
+      <div><div class="eyebrow" id="exPartLbl">Part 1</div><h2 id="exPartTitle">Introduction and interview</h2></div>
+      <div class="row headr"><span class="count" id="exClock">00:00</span><button class="btn btn-ghost" id="exEnd" type="button">End test</button></div>
+    </div>
+    <div class="steps" id="exSteps"></div>
+    <div class="examiner">
+      <div class="avatar" id="exAvatar" aria-hidden="true">
+        <svg viewBox="0 0 48 48"><circle cx="24" cy="18" r="9" fill="currentColor"/><path d="M8 44c1.5-9 8-14 16-14s14.5 5 16 14z" fill="currentColor"/></svg>
+      </div>
+      <div class="bubble" id="exBubble"><span class="eyebrow">Examiner</span><div id="exSay"></div></div>
+    </div>
+    <div class="cue" id="exCue" hidden></div>
+    <div class="prep" id="exPrep" hidden>
+      <div class="prephead"><span class="eyebrow">Preparation time</span><b id="exPrepT">1:00</b></div>
+      <div class="progress"><i id="exPrepBar"></i></div>
+      <textarea id="exNotes" placeholder="Notes (optional, not marked)"></textarea>
+      <button class="btn btn-primary" id="exPrepSkip" type="button">I'm ready, start speaking</button>
+    </div>
+    <div class="recbar" id="exRec" hidden>
+      <div class="recstate"><span class="dotrec" id="exDot"></span><span id="exState">Recording</span><span class="count" id="exRecT">0:00</span><span class="meta" id="exRecMax"></span></div>
+      <div class="bars" id="exBars" aria-hidden="true"></div>
+      <div class="live" id="exLive" hidden></div>
+    </div>
+    <div class="row">
+      <button class="btn btn-ghost" id="exRepeat" type="button">Repeat the question</button>
+      <span class="spacer"></span>
+      <button class="btn btn-primary" id="exDone" type="button" disabled>Finish answer</button>
+    </div>
+  </section>
+
+  <!-- MARKING / REPORT -->
+  <section class="sheet" id="spkReport" hidden></section>
+</div>
+
+  <footer>Uses your browser's built-in voices and microphone. Chrome and Edge work best. Speaking bands are estimates, not official IELTS results.</footer>
 </div>
 
 <script>
@@ -482,6 +724,7 @@ function loadVoices(){
   const okSaved = saved && voices.some(v => v.name === saved && v.lang.replace('_','-').toLowerCase() === want);
   if (okSaved) sel.value = saved;
   $('voiceWarn').textContent = voices.length ? '' : 'No voices found yet. They may load after a moment.';
+  fillSpkVoices();
 }
 $('accent').value = store.get('accent', 'en-US');
 $('accent').onchange = () => { store.set('accent', $('accent').value); store.set('voice', ''); loadVoices(); };
@@ -1081,6 +1324,742 @@ document.addEventListener('keydown', e => {
     else if (e.key.length === 1) { e.preventDefault(); typeKey(e.key === ' ' ? '␣' : e.key) }
   }
 });
+
+/* =====================================================================
+   SPEAKING — IELTS examiner
+   ===================================================================== */
+
+/* ---------- Tabs (hash routing) ---------- */
+function route(){
+  const t = location.hash === '#speaking' ? 'speaking' : 'dictation';
+  $('dictApp').hidden = t !== 'dictation';
+  $('spkApp').hidden = t !== 'speaking';
+  document.querySelectorAll('#tabs .tab').forEach(a => { if (a.dataset.tab === t) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current') });
+  $('brandSub').textContent = t === 'speaking'
+    ? 'A speaking examiner that asks real IELTS-style questions, records you, and marks your answers with a full band-score report.'
+    : 'Listen, type what you hear, and move on only when the spelling is right. Every word you miss comes back at the end for a second lesson.';
+  if (t === 'dictation') { if (exam) stopExam(true) }
+  else { document.body.classList.remove('drilling'); if (synth && !exam) synth.cancel(); aiInfo(); engineNote(); renderHistory() }
+}
+window.addEventListener('hashchange', route);
+
+/* ---------- Built-in flashcards ---------- */
+const P1 = [
+  ['Work or studies', ['Do you work or are you a student?', 'What do you like most about your studies or your job?', 'Is there anything you find difficult about it?', 'What would you like to do in the future?']],
+  ['Hometown', ['Where is your hometown?', 'What do you like about living there?', 'How has your hometown changed in recent years?', 'Would you recommend it to visitors? Why?']],
+  ['Home', ['Do you live in a house or an apartment?', 'Which room do you spend the most time in?', 'What would you like to change about your home?', 'Do you plan to live there for a long time?']],
+  ['Daily routine', ['What does a typical weekday look like for you?', 'Are you a morning person or an evening person?', 'Has your routine changed since you were a child?', 'Is there anything you would like to change about your routine?']],
+  ['Reading', ['Do you enjoy reading?', 'What kind of things do you usually read?', 'Do you prefer paper books or e-books?', 'Did you read much when you were a child?']],
+  ['Music', ['What kind of music do you like?', 'When do you usually listen to music?', 'Have you ever learned to play an instrument?', 'Is music important in your culture?']],
+  ['Weather', ['What is the weather like where you live?', 'What is your favourite kind of weather?', 'Does the weather affect your mood?', 'Do you check the weather forecast often?']],
+  ['Mobile phones', ['How often do you use your phone?', 'What do you mostly use it for?', 'Could you live without a smartphone for a week?', 'What was your first phone like?']],
+  ['Food', ['What is your favourite food?', 'Do you prefer eating at home or eating out?', 'Can you cook?', 'Is there any food you did not like as a child but enjoy now?']],
+  ['Travel', ['Do you like travelling?', 'Where did you go on your last trip?', 'Do you prefer travelling alone or with others?', 'Where would you like to travel in the future?']],
+  ['Friends', ['How often do you see your friends?', 'What do you usually do together?', 'Is it easy for you to make new friends?', 'Do you still keep in touch with friends from school?']],
+  ['Sport and exercise', ['Do you do any sport?', 'What sports are popular in your country?', 'Did you play sports at school?', 'Do you think people exercise enough nowadays?']],
+  ['Shopping', ['Do you enjoy shopping?', 'Do you prefer shopping online or in shops?', 'What was the last thing you bought?', 'Do you think people buy too many things?']],
+  ['The internet', ['How much time do you spend online each day?', 'What websites do you visit most?', 'Has the internet changed the way you study or work?', 'Do you think children should use the internet?']]
+];
+const P2 = [
+  ['Describe a person who has had an important influence on your life', ['who this person is', 'how you know them', 'what they have done for you'], 'and explain why they have influenced you so much',
+    ['What kinds of people are role models for young people today?', 'Do celebrities have a positive or negative influence on children?', 'Who has more influence on children, parents or teachers?', 'How has the influence of family changed compared with the past?']],
+  ['Describe a place you have visited that you would like to go back to', ['where it is', 'when you went there', 'what you did there'], 'and explain why you would like to go back',
+    ['Why do people like to visit places they have been to before?', 'How does tourism affect local communities?', 'Should historic places be protected from mass tourism?', 'Will people travel more or less in the future?']],
+  ['Describe a skill that took you a long time to learn', ['what the skill is', 'when you started learning it', 'how you learned it'], 'and explain why it took so long',
+    ['Which skills are most important for young people today?', 'Is it better to learn a skill from a teacher or by yourself?', 'Why do some people give up when learning something new?', 'Should schools teach more practical skills?']],
+  ['Describe a time when you helped someone', ['who you helped', 'what the situation was', 'how you helped them'], 'and explain how you felt about it',
+    ['Why do some people enjoy helping others?', 'Should helping the community be part of school education?', 'Do people help their neighbours less than in the past?', 'What can governments do to encourage volunteering?']],
+  ['Describe a book or film that made you think', ['what it was', 'when you read or watched it', 'what it was about'], 'and explain why it made you think',
+    ['Why do people still read books when they can watch films?', 'Should films that are based on true events be completely accurate?', 'How do books and films influence the way people think?', 'Will cinemas still exist in twenty years?']],
+  ['Describe a piece of technology that you find useful', ['what it is', 'when you got it', 'how often you use it'], 'and explain why it is useful to you',
+    ['How has technology changed the way people communicate?', 'Do older people find it harder to use new technology?', 'Are people too dependent on technology?', 'What technology will be most important in the future?']],
+  ['Describe an important decision you made', ['what the decision was', 'when you made it', 'who helped you decide'], 'and explain why it was important',
+    ['What important decisions do young people have to make?', 'Should parents make decisions for their children?', 'Why do some people find it hard to make decisions?', 'Is it better to decide quickly or to take a long time?']],
+  ['Describe a memorable journey you have made', ['where you went', 'how you travelled', 'who you were with'], 'and explain why it was memorable',
+    ['What are the advantages of travelling by train compared with flying?', 'How could public transport be improved in your city?', 'Why do some people prefer to drive their own car?', 'How will travel change in the future?']],
+  ['Describe a time when you were very busy', ['when it was', 'what you had to do', 'how you managed your time'], 'and explain how you felt during that time',
+    ['Why are people so busy these days?', 'Is it good for people to be busy?', 'How can people balance work and free time?', 'Do you think working hours will become shorter in the future?']],
+  ['Describe an environmental problem in the area where you live', ['what the problem is', 'what causes it', 'how it affects people'], 'and explain what could be done about it',
+    ['Who should be responsible for protecting the environment?', 'Can industry, such as mining, grow without harming the environment?', 'Do individuals or governments have more power to solve environmental problems?', 'How can children be taught to care about nature?']],
+  ['Describe a goal you would like to achieve in the future', ['what the goal is', 'when you set it', 'what you are doing to achieve it'], 'and explain why this goal is important to you',
+    ['Why is it important for people to set goals?', 'Should young people be ambitious?', 'How do goals change as people get older?', 'Is success mainly about hard work or luck?']],
+  ['Describe a celebration or festival that is important in your country', ['what it is', 'when it happens', 'what people do'], 'and explain why it is important',
+    ['Why are traditional festivals important?', 'Are traditional celebrations losing their meaning?', 'How do festivals bring people together?', 'Should governments spend money on public celebrations?']],
+  ['Describe a teacher who helped you', ['who the teacher was', 'what subject they taught', 'what they did that helped you'], 'and explain why you remember them',
+    ['What qualities make a good teacher?', 'Will online learning replace traditional classrooms?', 'Should teachers be paid more?', 'Is it better to study in small classes or large ones?']],
+  ['Describe a time you had to learn something quickly', ['what you had to learn', 'why you had to learn it quickly', 'how you learned it'], 'and explain how well you did',
+    ['Do people learn better under pressure?', 'How has the internet changed the way people learn?', 'Is it better to learn in a group or alone?', 'Why do adults sometimes find it harder to learn than children?']]
+];
+const BUILTIN = [
+  ...P1.map(([t, q], i) => ({ id: 'b1-' + i, type: 'p1', title: t, questions: q, src: 'built-in' })),
+  ...P2.map(([t, b, e, p3], i) => ({ id: 'b2-' + i, type: 'p2', title: t, bullets: b, explain: e, part3: p3, src: 'built-in' }))
+];
+const myCards = () => store.get('spkDeck', []);
+const allCards = () => [...myCards(), ...BUILTIN];
+let deckFilter = 'all', deckLimit = 12;
+
+function cardHTML(c){
+  if (c.type === 'p1') return `
+    <div class="face front"><span class="tag ${c.src !== 'built-in' ? 'ai' : ''}">Part 1 · ${c.src === 'built-in' ? 'topic' : c.src}</span><h3>${esc(c.title)}</h3>
+      <span class="small">${c.questions.length} questions · tap to see them</span>
+      <div class="fcfoot"><button class="btn btn-ghost btn-sm" data-practise="${c.id}" type="button">Practise</button></div></div>
+    <div class="face back"><span class="tag">Part 1 · ${esc(c.title)}</span><ul>${c.questions.map(q => `<li>${esc(q)}</li>`).join('')}</ul>
+      <div class="fcfoot"><span class="small">tap to flip</span><button class="btn btn-primary btn-sm" data-practise="${c.id}" type="button">Practise</button></div></div>`;
+  return `
+    <div class="face front"><span class="tag p2">Part 2 cue card${c.src !== 'built-in' ? ' · ' + esc(c.src) : ''}</span><h3>${esc(c.title)}</h3>
+      <span class="small">You should say:</span><ul>${c.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul><span class="small">${esc(c.explain || '')}</span>
+      <div class="fcfoot"><span class="small">tap for Part 3</span><button class="btn btn-ghost btn-sm" data-practise="${c.id}" type="button">Practise</button></div></div>
+    <div class="face back"><span class="tag">Part 3 discussion</span><ul>${(c.part3 || []).map(q => `<li>${esc(q)}</li>`).join('')}</ul>
+      <div class="fcfoot"><span class="small">tap to flip</span><button class="btn btn-primary btn-sm" data-practise="${c.id}" type="button">Practise 2 + 3</button></div></div>`;
+}
+function renderDeck(){
+  const used = new Set(store.get('spkUsed', []));
+  let cards = allCards();
+  if (deckFilter === 'p1') cards = cards.filter(c => c.type === 'p1');
+  if (deckFilter === 'p2') cards = cards.filter(c => c.type === 'p2');
+  if (deckFilter === 'new') cards = cards.filter(c => c.src !== 'built-in');
+  const p1n = allCards().filter(c => c.type === 'p1').length, p2n = allCards().length - p1n;
+  $('deckCount').textContent = `${p1n} topics · ${p2n} cue cards`;
+  const d = $('deck'); d.innerHTML = '';
+  if (!cards.length) { d.innerHTML = '<p class="meta">No cards here yet. Ask the AI for new cards or add your own below.</p>' }
+  cards.slice(0, deckLimit).forEach(c => {
+    const el = document.createElement('div'); el.className = 'fc'; el.dataset.id = c.id;
+    el.innerHTML = `<div class="inner">${cardHTML(c)}</div>`;
+    if (used.has(c.id)) el.querySelector('.front .small').insertAdjacentHTML('afterend', '<span class="small">✓ practised</span>');
+    d.appendChild(el);
+  });
+  $('deckMore').hidden = cards.length <= deckLimit;
+}
+$('deck').addEventListener('click', e => {
+  const p = e.target.closest('[data-practise]');
+  if (p) { e.stopPropagation(); const c = allCards().find(x => x.id === p.dataset.practise); if (c) startExam(planFor('card', c)); return }
+  const f = e.target.closest('.fc'); if (f) f.classList.toggle('flip');
+});
+document.querySelectorAll('#deckFilter .chip').forEach(b => b.onclick = () => {
+  deckFilter = b.dataset.f; deckLimit = 12;
+  document.querySelectorAll('#deckFilter .chip').forEach(x => x.setAttribute('aria-pressed', String(x === b))); renderDeck();
+});
+$('deckMore').onclick = () => { deckLimit += 12; renderDeck() };
+$('deckAddT').onclick = () => { const b = $('deckAddBox'); b.hidden = !b.hidden; $('deckAddT').setAttribute('aria-expanded', String(!b.hidden)) };
+function deckStatus(html, kind){ const s = $('deckStatus'); s.className = 'status ' + (kind || ''); s.innerHTML = html }
+function saveCards(newOnes){
+  const mine = myCards(), titles = new Set(allCards().map(c => c.title.toLowerCase()));
+  const fresh = newOnes.filter(c => c.title && !titles.has(c.title.toLowerCase()) && titles.add(c.title.toLowerCase()));
+  store.set('spkDeck', [...fresh, ...mine].slice(0, 300)); renderDeck();
+  return fresh.length;
+}
+$('deckAddGo').onclick = () => {
+  const blocks = $('deckAdd').value.split(/\n\s*\n/).map(b => b.split('\n').map(l => l.trim()).filter(Boolean)).filter(b => b.length);
+  const cards = blocks.map((ls, i) => {
+    const id = 'm' + Date.now().toString(36) + i;
+    if (/^describe\b/i.test(ls[0])) {
+      const p3i = ls.findIndex(l => /^part\s*3\s*:?$/i.test(l));
+      const body = p3i >= 0 ? ls.slice(1, p3i) : ls.slice(1);
+      return { id, type: 'p2', src: 'mine', title: ls[0],
+        bullets: body.filter(l => /^[-•*]/.test(l)).map(l => l.replace(/^[-•*]\s*/, '')),
+        explain: body.find(l => /^and explain/i.test(l)) || '',
+        part3: p3i >= 0 ? ls.slice(p3i + 1) : [] };
+    }
+    const title = ls[0].replace(/^topic\s*:\s*/i, '');
+    const qs = /^topic\s*:/i.test(ls[0]) ? ls.slice(1) : ls;
+    return { id, type: 'p1', src: 'mine', title: /^topic\s*:/i.test(ls[0]) ? title : 'My questions', questions: qs };
+  }).filter(c => (c.type === 'p1' ? c.questions.length : c.bullets.length));
+  const n = saveCards(cards);
+  deckStatus(n ? `${n} ${n === 1 ? 'card' : 'cards'} added to your deck.` : 'No new cards found. Check the format in the example.', n ? 'ok' : 'err');
+  if (n) $('deckAdd').value = '';
+};
+$('deckAi').onclick = async () => {
+  const btn = $('deckAi'); btn.disabled = true;
+  deckStatus(`<span class="spin"></span> Asking ${PROVIDERS[aiProv.value].name} for new speaking cards…`, 'wait');
+  try {
+    const have = allCards().map(c => c.title).slice(0, 120).join(' | ');
+    const text = await callLLM([
+      { role: 'system', content: 'You write authentic IELTS Speaking test material in the style of official Cambridge IELTS books. Answer with one JSON object only.' },
+      { role: 'user', content: `Create 3 new IELTS Speaking Part 1 topics (4 questions each) and 4 new Part 2 cue cards, each with 3 "You should say" points, an "and explain" line, and 4 linked Part 3 discussion questions. Mix everyday topics with work, study, technology, society and environment. Do not repeat these existing topics: ${have}.\nReturn JSON exactly like: {"part1":[{"topic":"...","questions":["...","...","...","..."]}],"part2":[{"title":"Describe ...","bullets":["...","...","..."],"explain":"and explain ...","part3":["...","...","...","..."]}]}` }
+    ], { maxTokens: 5000 });
+    const j = parseObj(text);
+    if (!j) throw new Error('The AI reply could not be read. Try again.');
+    const t = Date.now().toString(36);
+    const cards = [
+      ...(j.part1 || []).map((c, i) => ({ id: 'a1' + t + i, type: 'p1', src: 'AI', title: String(c.topic || c.title || ''), questions: (c.questions || []).map(String).filter(Boolean) })),
+      ...(j.part2 || []).map((c, i) => ({ id: 'a2' + t + i, type: 'p2', src: 'AI', title: String(c.title || ''), bullets: (c.bullets || []).map(String), explain: String(c.explain || ''), part3: (c.part3 || []).map(String) }))
+    ].filter(c => c.title && (c.type === 'p1' ? c.questions.length >= 2 : c.bullets.length >= 2));
+    const n = saveCards(cards);
+    deckFilter = 'new'; document.querySelectorAll('#deckFilter .chip').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.f === 'new'))); renderDeck();
+    deckStatus(n ? `${n} new cards saved to your deck. They stay here, so the AI is not asked again for them.` : 'The AI only suggested topics you already have. Try again.', n ? 'ok' : 'err');
+  } catch (e) { deckStatus(esc(e.message), 'err') }
+  finally { btn.disabled = false }
+};
+function parseObj(text){
+  text = String(text).replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/```(?:json)?/gi, '');
+  const a = text.indexOf('{'), b = text.lastIndexOf('}');
+  if (a < 0 || b <= a) return null;
+  try { return JSON.parse(text.slice(a, b + 1)) } catch (e) {
+    try { return JSON.parse(text.slice(a, b + 1).replace(/,\s*([}\]])/g, '$1')) } catch (e2) { return null }
+  }
+}
+renderDeck();
+
+/* ---------- Home settings ---------- */
+let spkMode = store.get('spkMode', 'full');
+const MODE_INFO = {
+  full: 'Parts 1, 2 and 3, like the real test. About 12 to 14 minutes.',
+  p1: 'Part 1 only: two topics, about 8 short questions. About 4 to 5 minutes.',
+  p2: 'Part 2 only: one cue card, one minute to prepare, up to two minutes to speak.',
+  p3: 'Part 3 only: four discussion questions linked to a cue card topic. About 5 minutes.'
+};
+function setMode(m){ spkMode = m; store.set('spkMode', m); document.querySelectorAll('#spkModeSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m))); $('spkModeInfo').textContent = MODE_INFO[m] }
+document.querySelectorAll('#spkModeSeg button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+setMode(spkMode);
+const SRClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+$('spkEngine').value = store.get('spkEngine', SRClass ? 'browser' : 'groq');
+function engineNote(){
+  const e = $('spkEngine').value;
+  store.set('spkEngine', e);
+  $('spkEngineNote').innerHTML = e === 'browser'
+    ? (SRClass ? 'Live transcription is built into your browser and free. In Chrome it is processed by Google, so it may need a VPN in some regions. It tends to drop “um” and “uh”, so hesitation is judged from timing instead.' : '<b>This browser has no built-in speech recognition.</b> Use Chrome, Edge or Safari, or switch to Groq Whisper.')
+    : `Your answers are recorded and sent to Groq Whisper after each one. It is more accurate and keeps fillers like “um”. It needs a free Groq key in AI settings (provider: Groq) ${provCfg('groq').key ? '<b style="color:var(--good)">· key saved ✓</b>' : '<b style="color:var(--bad)">· no key saved yet</b>'}.`;
+}
+$('spkEngine').onchange = engineNote; engineNote();
+['spkShowQ', 'spkLive', 'spkAutoStop'].forEach(id => { const v = store.get(id, null); if (v !== null) $(id).checked = v; $(id).onchange = () => store.set(id, $(id).checked) });
+function fillSpkVoices(){
+  const sel = $('spkVoice'); if (!sel) return;
+  const saved = store.get('spkVoice', ''), want = $('accent').value.toLowerCase();
+  sel.innerHTML = '';
+  const vs = voices.slice().sort((a, b) => ((a.lang.replace('_', '-').toLowerCase() === want ? 0 : 2) + (/natural|neural|online/i.test(a.name) ? 0 : 1)) - ((b.lang.replace('_', '-').toLowerCase() === want ? 0 : 2) + (/natural|neural|online/i.test(b.name) ? 0 : 1)));
+  vs.forEach(v => { const o = document.createElement('option'); o.value = v.name; o.textContent = `${v.name.replace(/^Microsoft |^Google /, '')} (${v.lang})`; sel.appendChild(o) });
+  if (saved && vs.some(v => v.name === saved)) sel.value = saved;
+}
+$('spkVoice').onchange = () => store.set('spkVoice', $('spkVoice').value);
+function aiInfo(){ $('spkAiInfo').textContent = `Marking by: ${PROVIDERS[aiProv.value].name}${provCfg().key || PROVIDERS[aiProv.value].key !== 'required' ? '' : ' (key needed)'}` }
+aiInfo();
+$('spkAiSet').onclick = () => { location.hash = '#dictation'; setTimeout(() => { $('aiSettings').hidden = false; $('aiSetToggle').setAttribute('aria-expanded', 'true'); $('aiBox').scrollIntoView({ behavior: 'smooth' }) }, 50) };
+function spkStatus(html, kind){ const s = $('spkStatus'); s.className = 'status ' + (kind || ''); s.innerHTML = html }
+
+/* ---------- Microphone ---------- */
+const mic = { stream: null, ctx: null, analyser: null, buf: null };
+async function ensureMic(){
+  if (mic.stream && mic.stream.getAudioTracks().some(t => t.readyState === 'live')) { if (mic.ctx.state === 'suspended') await mic.ctx.resume(); return }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('This browser cannot use the microphone here. Open the app at its GitHub address in Chrome, Edge or Safari.');
+  try { mic.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }) }
+  catch (e) { throw new Error(e.name === 'NotAllowedError' ? 'Microphone access was blocked. Allow the microphone for this site in your browser settings, then try again.' : 'No microphone was found. Connect one and try again.') }
+  const AC = window.AudioContext || window.webkitAudioContext;
+  mic.ctx = new AC(); const src = mic.ctx.createMediaStreamSource(mic.stream);
+  mic.analyser = mic.ctx.createAnalyser(); mic.analyser.fftSize = 1024; src.connect(mic.analyser);
+  mic.buf = new Float32Array(mic.analyser.fftSize);
+}
+function micLevel(){
+  if (!mic.analyser) return 0;
+  mic.analyser.getFloatTimeDomainData(mic.buf);
+  let s = 0; for (let i = 0; i < mic.buf.length; i++) s += mic.buf[i] * mic.buf[i];
+  return Math.sqrt(s / mic.buf.length);
+}
+function releaseMic(){ if (mic.stream) mic.stream.getTracks().forEach(t => t.stop()); if (mic.ctx) try { mic.ctx.close() } catch (e) {} mic.stream = mic.ctx = mic.analyser = null }
+let micTestTimer = null;
+$('micTest').onclick = async () => {
+  if (micTestTimer) { clearInterval(micTestTimer); micTestTimer = null; $('micTest').textContent = '🎙 Check microphone'; $('micMeter').firstChild.style.width = '0'; $('micMsg').textContent = ''; return }
+  try {
+    await ensureMic(); $('micTest').textContent = 'Stop check'; let peak = 0;
+    $('micMsg').textContent = 'Say something…';
+    micTestTimer = setInterval(() => { const l = micLevel(); peak = Math.max(peak * 0.97, l); $('micMeter').firstChild.style.width = Math.min(100, l * 900) + '%'; if (peak > 0.03) $('micMsg').textContent = 'Your microphone is working.' }, 80);
+  } catch (e) { $('micMsg').textContent = e.message }
+};
+
+/* ---------- Examiner voice ---------- */
+let sayToken = 0;
+function say(text){
+  return new Promise(res => {
+    $('exSay').textContent = text;
+    $('exSay').classList.remove('hiddenq');
+    if (!synth) return setTimeout(res, 400 + text.length * 40);
+    synth.cancel(); const my = ++sayToken;
+    const u = new SpeechSynthesisUtterance(text);
+    const v = voices.find(x => x.name === $('spkVoice').value);
+    if (v) { u.voice = v; u.lang = v.lang } else u.lang = $('accent').value;
+    u.rate = 0.96;
+    let done = false; const fin = () => { if (done) return; done = true; $('exAvatar').classList.remove('talking'); clearTimeout(guard); res() };
+    u.onend = fin; u.onerror = fin;
+    const guard = setTimeout(fin, 2500 + text.length * 110);
+    $('exAvatar').classList.add('talking');
+    synth.speak(u);
+    if (my !== sayToken) fin();
+  });
+}
+function showQuestion(text){ const el = $('exSay'); el.textContent = text; if (!$('spkShowQ').checked) { el.textContent = 'Listen to the question. Tap “Repeat the question” if you need to hear it again.'; el.classList.add('hiddenq') } }
+
+/* ---------- Live speech recognition (browser) ---------- */
+class LiveSR {
+  constructor(lang, onText){ this.lang = lang; this.onText = onText; this.final = ''; this.interim = ''; this.conf = []; this.active = false; this.err = null; this.lastResultAt = null; this.firstResultAt = null }
+  start(){ this.active = true; this._make() }
+  _make(){
+    const r = new SRClass(); this.r = r;
+    r.lang = this.lang; r.continuous = true; r.interimResults = true; r.maxAlternatives = 1;
+    r.onresult = e => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const res = e.results[i], t = res[0].transcript;
+        if (res.isFinal) { this.final += t.trim() + ' '; if (res[0].confidence > 0) this.conf.push(res[0].confidence) } else interim += t;
+      }
+      this.interim = interim; const now = performance.now();
+      if (!this.firstResultAt) this.firstResultAt = now; this.lastResultAt = now;
+      this.onText && this.onText(this.final, interim);
+    };
+    r.onerror = e => { if (['not-allowed', 'service-not-allowed', 'network', 'audio-capture', 'language-not-supported'].includes(e.error)) { this.err = e.error; this.active = false } };
+    r.onend = () => { if (this.active) { setTimeout(() => { if (this.active) try { this._make() } catch (er) {} }, 120) } else if (this._stopRes) this._stopRes() };
+    try { r.start() } catch (e) {}
+  }
+  stop(){
+    this.active = false;
+    return new Promise(res => {
+      const out = () => res({ text: (this.final + ' ' + this.interim).replace(/\s+/g, ' ').trim(), conf: this.conf.length ? this.conf.reduce((a, b) => a + b, 0) / this.conf.length : null, err: this.err });
+      this._stopRes = out; setTimeout(out, 1500);
+      try { this.r.stop() } catch (e) { out() }
+    });
+  }
+}
+
+/* ---------- Groq Whisper ---------- */
+async function whisper(blob){
+  const c = provCfg('groq');
+  if (!c.key) throw new Error('Add a free Groq key in AI settings (provider: Groq) to use Whisper.');
+  const ext = /mp4|m4a|aac/.test(blob.type) ? 'm4a' : /ogg/.test(blob.type) ? 'ogg' : 'webm';
+  const send = async model => {
+    const fd = new FormData();
+    fd.append('file', blob, 'answer.' + ext); fd.append('model', model);
+    fd.append('response_format', 'verbose_json'); fd.append('language', 'en'); fd.append('temperature', '0');
+    fd.append('prompt', 'Umm, so, uh, I think... well, you know, I mean, hmm. Let me think.');
+    return fetch('https://api.groq.com/openai/v1/audio/transcriptions', { method: 'POST', headers: { Authorization: 'Bearer ' + c.key }, body: fd });
+  };
+  let r;
+  try { r = await send('whisper-large-v3-turbo'); if (r.status === 404 || r.status === 400) r = await send('whisper-large-v3') }
+  catch (e) { throw new Error('Could not reach Groq for transcription. It may need a VPN on your network.') }
+  if (r.status === 401) throw new Error('Groq rejected the key. Check it in AI settings.');
+  if (r.status === 429) throw new Error('Groq rate limit reached. Wait a minute and try marking again.');
+  if (!r.ok) throw new Error('Groq transcription failed (' + r.status + ').');
+  const j = await r.json();
+  const segs = j.segments || [];
+  const conf = segs.length ? segs.reduce((a, s) => a + Math.exp(s.avg_logprob || 0), 0) / segs.length : null;
+  return { text: String(j.text || '').trim(), conf };
+}
+
+/* ---------- Building a test from the flashcards ---------- */
+function pickCard(type, avoidId){
+  const used = new Set(store.get('spkUsed', []));
+  const cards = allCards().filter(c => c.type === type && c.id !== avoidId);
+  const fresh = cards.filter(c => !used.has(c.id));
+  const pool = fresh.length ? fresh : cards;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+function markUsed(ids){ const u = new Set(store.get('spkUsed', [])); ids.forEach(i => u.add(i)); const arr = [...u]; store.set('spkUsed', arr.length > 400 ? arr.slice(-400) : arr) }
+function planFor(mode, card){
+  const steps = [];
+  const p1 = (c, n) => c.questions.slice(0, n).forEach((q, i) => steps.push({ part: 1, q, topic: c.title, first: i === 0, cardId: c.id }));
+  const p2 = c => steps.push({ part: 2, q: c.title, card: c, cardId: c.id });
+  const p3 = c => (c.part3 && c.part3.length ? c.part3 : ['Why do you think this topic matters to people?', 'How has this changed over the last twenty years?', 'What might change in the future?']).slice(0, 4).forEach((q, i) => steps.push({ part: 3, q, topic: c.title, first: i === 0, cardId: c.id }));
+  if (mode === 'card') {
+    if (card.type === 'p1') { p1(card, 5); return { label: 'Part 1 · ' + card.title, mode: 'p1', steps } }
+    p2(card); p3(card); return { label: 'Parts 2 and 3 · cue card', mode: 'p23', steps };
+  }
+  if (mode === 'full' || mode === 'p1') {
+    const work = allCards().find(c => c.id === 'b1-0');
+    const t1 = mode === 'full' ? work : pickCard('p1');
+    const t2 = pickCard('p1', t1.id);
+    p1(t1, mode === 'full' ? 3 : 4); p1(t2, 4);
+  }
+  if (mode === 'full' || mode === 'p2' || mode === 'p3') {
+    const c = pickCard('p2');
+    if (mode !== 'p3') p2(c);
+    if (mode !== 'p2') p3(c);
+  }
+  return { label: { full: 'Full speaking test', p1: 'Part 1 practice', p2: 'Part 2 practice', p3: 'Part 3 practice' }[mode], mode, steps };
+}
+
+/* ---------- Running the test ---------- */
+let exam = null, current = null;
+const PART_TITLES = { 1: 'Introduction and interview', 2: 'Individual long turn', 3: 'Two-way discussion' };
+const LIMITS = { 1: { max: 45, silence: 5, none: 12 }, 2: { max: 120, silence: 9, none: 20 }, 3: { max: 90, silence: 6, none: 15 } };
+const fmt = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function showSpk(id){ ['spkHome', 'spkDeckSec', 'spkHistSec', 'spkExam', 'spkReport'].forEach(s => $(s).hidden = id === 'home' ? (s === 'spkExam' || s === 'spkReport' || (s === 'spkHistSec' && !store.get('spkHist', []).length)) : s !== id); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+function setSteps(part){
+  const parts = [...new Set(exam.plan.steps.map(s => s.part))];
+  $('exSteps').innerHTML = parts.map(p => `<span class="${p === part ? 'on' : p < part ? 'done' : ''}">Part ${p}</span>`).join('');
+  $('exPartLbl').textContent = `Part ${part}`; $('exPartTitle').textContent = PART_TITLES[part];
+}
+function setRec(state, opts = {}){
+  const show = state !== 'off';
+  $('exRec').hidden = !show;
+  $('exDot').classList.toggle('on', state === 'rec');
+  $('exState').textContent = { rec: 'Recording your answer', wait: 'Examiner speaking…', proc: 'Saving…' }[state] || '';
+  $('exDone').disabled = state !== 'rec';
+  $('exRecMax').textContent = opts.max ? `of ${fmt(opts.max)} max` : '';
+  if (state !== 'rec') $('exRecT').textContent = '';
+}
+function buildBars(){ const b = $('exBars'); if (b.children.length) return; for (let i = 0; i < 32; i++) b.appendChild(document.createElement('i')) }
+function pushBar(l){ const b = $('exBars'); const first = b.firstChild; b.appendChild(first); first.style.height = Math.max(4, Math.min(100, l * 1100)) + '%' }
+
+function pickMime(){ const t = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus']; return window.MediaRecorder ? t.find(x => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(x)) || '' : '' }
+
+function recordAnswer(part){
+  const lim = LIMITS[part], auto = $('spkAutoStop').checked;
+  const useSR = exam.engine === 'browser';
+  const useAudio = !!mic.stream;
+  return new Promise(resolve => {
+    let rec = null; const chunks = [];
+    if (useAudio && window.MediaRecorder) {
+      const mime = pickMime();
+      try { rec = new MediaRecorder(mic.stream, mime ? { mimeType: mime } : undefined) } catch (e) { try { rec = new MediaRecorder(mic.stream) } catch (e2) { rec = null } }
+      if (rec) { rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data) }; rec.start(250) }
+    }
+    const live = $('exLive'); live.hidden = !$('spkLive').checked || !useSR; live.innerHTML = '';
+    const sr = useSR ? new LiveSR($('accent').value, (f, i) => { live.innerHTML = esc(f) + '<span class="interim">' + esc(i) + '</span>'; live.scrollTop = live.scrollHeight }) : null;
+    if (sr) sr.start();
+    const t0 = performance.now();
+    let first = null, last = null, speechT = 0, pauses = 0, longest = 0, floor = null; const cal = [];
+    setRec('rec', { max: lim.max });
+    let ended = false;
+    const tick = setInterval(() => {
+      const el = (performance.now() - t0) / 1000;
+      $('exRecT').textContent = fmt(el);
+      let voiced = false;
+      if (useAudio) {
+        const l = micLevel(); pushBar(l);
+        if (el < 0.5) { cal.push(l); return }
+        if (floor === null) { const s = cal.slice().sort((a, b) => a - b); floor = s[Math.floor(s.length / 2)] || 0.004 }
+        voiced = l > Math.max(0.012, floor * 3);
+      } else if (sr && sr.lastResultAt) {
+        voiced = (performance.now() - sr.lastResultAt) < 700; pushBar(voiced ? 0.05 + Math.random() * 0.04 : 0.003);
+      }
+      if (voiced) {
+        if (first === null) first = el;
+        if (last !== null && el - last >= 1.2) { pauses++; longest = Math.max(longest, el - last) }
+        last = el; speechT += 0.1;
+      }
+      if (sr && sr.err && !exam.srWarned) { exam.srWarned = true; spkWarn(sr.err) }
+      if (auto && first !== null && el - last >= lim.silence) done('silence');
+      if (auto && first === null && el >= lim.none) done('nospeech');
+      if (el >= lim.max) done('time');
+    }, 100);
+    current = { finish: () => done('user'), repeat: () => done('repeat'), abort: () => done('abort') };
+    async function done(reason){
+      if (ended) return; ended = true; clearInterval(tick); current = null;
+      const dur = (performance.now() - t0) / 1000;
+      setRec('proc');
+      const srRes = sr ? await sr.stop() : null;
+      const fin = () => resolve({ reason, dur, latency: first, span: first !== null ? Math.max(1, last - first + 0.3) : 0, speech: speechT, pauses: useAudio ? pauses : null, longest: useAudio ? longest : null, blob: chunks.length ? new Blob(chunks, { type: (rec && rec.mimeType) || 'audio/webm' }) : null, sr: srRes });
+      if (rec && rec.state !== 'inactive') { rec.onstop = fin; try { rec.stop() } catch (e) { fin() } } else fin();
+    }
+  });
+}
+function spkWarn(err){
+  const msg = { network: 'Live transcription cannot reach its online service. Try a VPN, or switch Transcription to Groq Whisper.', 'not-allowed': 'Speech recognition was blocked. Allow the microphone for this site.', 'service-not-allowed': 'This browser does not allow speech recognition here. Switch Transcription to Groq Whisper.', 'audio-capture': 'Speech recognition could not use the microphone.', 'language-not-supported': 'Speech recognition does not support the chosen English variant.' }[err] || 'Live transcription stopped working.';
+  $('exLive').hidden = false; $('exLive').innerHTML = `<span style="color:var(--bad)">${esc(msg)} Your audio is still being recorded.</span>`;
+}
+
+function greeting(){ const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening' }
+
+async function startExam(plan){
+  if (exam) return;
+  const engine = $('spkEngine').value;
+  if (engine === 'browser' && !SRClass) { spkStatus('This browser has no speech recognition. Switch Transcription to Groq Whisper, or open the app in Chrome, Edge or Safari.', 'err'); showSpk('home'); return }
+  if (engine === 'groq' && !provCfg('groq').key) { spkStatus('Groq Whisper needs a free Groq key. Open AI settings, choose Groq and paste your key.', 'err'); showSpk('home'); return }
+  if (micTestTimer) $('micTest').click();
+  // Phones often cannot record and run speech recognition at the same time, so only the recognizer listens there.
+  const audioOK = !(engine === 'browser' && isTouch());
+  try { if (audioOK || engine === 'groq') await ensureMic() } catch (e) { spkStatus(esc(e.message), 'err'); showSpk('home'); return }
+  if (!audioOK) releaseMic();
+  spkStatus('');
+  exam = { plan, engine, answers: [], t0: performance.now(), token: Symbol(), pending: [], srWarned: false };
+  const tok = exam.token;
+  const alive = () => exam && exam.token === tok;
+  buildBars(); showSpk('spkExam'); $('exCue').hidden = true; $('exPrep').hidden = true; setRec('off');
+  const clock = setInterval(() => { if (!alive()) return clearInterval(clock); $('exClock').textContent = fmt((performance.now() - exam.t0) / 1000) }, 500);
+  exam.clock = clock;
+  const steps = plan.steps; let lastPart = 0;
+  for (let i = 0; i < steps.length && alive(); i++) {
+    const st = steps[i];
+    if (st.part !== lastPart) {
+      setSteps(st.part); lastPart = st.part; setRec('wait');
+      if (st.part === 1) await say(`${greeting()}. I'm going to be your examiner today. In this first part, I'd like to ask you some questions about yourself.`);
+      if (st.part === 3) await say(`We've been talking about ${st.topic.replace(/^Describe\s+/i, '').replace(/^an? /i, 'a ')}, and I'd like to discuss with you one or two more general questions related to this.`);
+      if (!alive()) break;
+    }
+    if (st.part === 1 && st.first && i > 0) { setRec('wait'); await say(`Now let's talk about ${st.topic.toLowerCase()}.`) }
+    else if (st.part === 1 && st.first) { setRec('wait'); await say(`Let's talk about ${st.topic.toLowerCase()}.`) }
+    if (!alive()) break;
+    if (st.part === 2) { await runPart2(st, alive); continue }
+    let ans;
+    do {
+      setRec('wait'); showQuestion(st.q);
+      await say(st.q); showQuestion(st.q);
+      if (!alive()) break;
+      ans = await recordAnswer(st.part);
+    } while (alive() && ans.reason === 'repeat');
+    if (!alive() || ans.reason === 'abort') break;
+    keepAnswer(st, ans);
+    if (st.part === 1 && ans.reason === 'nospeech') { await say("That's all right. Let's move on.") }
+  }
+  if (!alive()) return;
+  setRec('wait'); $('exCue').hidden = true;
+  await say(plan.mode === 'full' ? 'Thank you. That is the end of the speaking test.' : 'Thank you. That is the end of this part.');
+  if (!alive()) return;
+  markUsed([...new Set(steps.map(s => s.cardId))]);
+  finishExam();
+}
+async function runPart2(st, alive){
+  const c = st.card;
+  setRec('wait');
+  await say("Now I'm going to give you a topic, and I'd like you to talk about it for one to two minutes. Before you talk, you'll have one minute to think about what you're going to say. You can make some notes if you wish.");
+  if (!alive()) return;
+  const cue = $('exCue');
+  cue.innerHTML = `<h3>${esc(c.title)}</h3><span class="say">You should say:</span><ul>${c.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul><span>${esc(c.explain || '')}</span>`;
+  cue.hidden = false;
+  await say("Here is your topic. " + c.title + ".");
+  if (!alive()) return;
+  $('exSay').textContent = 'You have one minute to prepare.'; setRec('off');
+  $('exPrep').hidden = false; $('exNotes').value = '';
+  await new Promise(res => {
+    const t0 = performance.now();
+    const t = setInterval(() => {
+      const left = 60 - (performance.now() - t0) / 1000;
+      $('exPrepT').textContent = fmt(left); $('exPrepBar').style.width = Math.min(100, (60 - left) / 60 * 100) + '%';
+      if (left <= 0 || !alive()) end();
+    }, 200);
+    const end = () => { clearInterval(t); $('exPrepSkip').onclick = null; res() };
+    $('exPrepSkip').onclick = end;
+  });
+  $('exPrep').hidden = true;
+  if (!alive()) return;
+  let ans;
+  do {
+    setRec('wait');
+    await say("All right? Remember, you have one to two minutes for this, so don't worry if I stop you. I'll tell you when the time is up. Can you start speaking now, please?");
+    if (!alive()) return;
+    $('exSay').textContent = 'Talk about the topic on the card. Up to 2 minutes.';
+    ans = await recordAnswer(2);
+  } while (alive() && ans.reason === 'repeat');
+  if (!alive() || ans.reason === 'abort') return;
+  keepAnswer(st, ans);
+  setRec('wait'); await say('Thank you.');
+}
+function keepAnswer(st, ans){
+  const a = { part: st.part, q: st.part === 2 ? st.card.title + ' — You should say: ' + st.card.bullets.join('; ') + '; ' + (st.card.explain || '') : st.q, shortQ: st.q, ...ans, transcript: '', conf: null, url: ans.blob ? URL.createObjectURL(ans.blob) : null };
+  if (exam.engine === 'browser') { a.transcript = ans.sr ? ans.sr.text : ''; a.conf = ans.sr ? ans.sr.conf : null }
+  else if (ans.blob) {
+    a.tx = whisper(ans.blob).then(r => { a.transcript = r.text; a.conf = r.conf }).catch(e => { a.txErr = e.message });
+    exam.pending.push(a.tx);
+  }
+  exam.answers.push(a);
+}
+function stopExam(silent){
+  if (!exam) return;
+  if (current) current.abort();
+  clearInterval(exam.clock);
+  if (synth) synth.cancel(); sayToken++;
+  $('exAvatar').classList.remove('talking');
+  const had = exam.answers.length;
+  if (!silent && had) { finishExam(); return }
+  exam = null; releaseMic(); showSpk('home');
+}
+$('exEnd').onclick = () => stopExam(false);
+$('exDone').onclick = () => current && current.finish();
+$('exRepeat').onclick = () => { if (current) current.repeat() };
+$('spkStart').onclick = () => startExam(planFor(spkMode));
+
+/* ---------- Metrics ---------- */
+const FILLER_RE = /\b(u+m+|u+h+|e+r+m*|a+h+|hm+|mm+)\b/gi;
+const DISCOURSE_RE = /\b(you know|i mean|sort of|kind of|basically|like,)/gi;
+const wordsOf = t => (t.toLowerCase().match(/[a-z]+(?:'[a-z]+)?/g) || []);
+function metricsOf(a){
+  const w = wordsOf(a.transcript), fill = (a.transcript.match(FILLER_RE) || []).length, disc = (a.transcript.match(DISCOURSE_RE) || []).length;
+  const words = w.filter(x => !/^(u+m+|u+h+|e+r+m*|a+h+|hm+|mm+)$/.test(x)).length;
+  return { words, fillers: fill, discourse: disc, wpm: a.span > 3 ? Math.round(words / a.span * 60) : null };
+}
+const STOP = new Set('a an the and or but so to of in on at for with is are was were be been it this that i you he she we they my your his her our their me him us them do does did have has had not no yes very really just about there here what which who when where why how as if from by can could would will should than then too also some any more most'.split(' '));
+function overallMetrics(ans){
+  const per = ans.map(metricsOf);
+  const words = per.reduce((s, m) => s + m.words, 0);
+  const span = ans.reduce((s, a) => s + (a.span || 0), 0);
+  const all = ans.flatMap(a => wordsOf(a.transcript)).filter(x => !STOP.has(x) && x.length > 2 && !/^(u+m+|u+h+|e+r+m*|a+h+|hm+)$/.test(x));
+  const uniq = new Set(all).size;
+  const lat = ans.filter(a => a.latency !== null && a.latency !== undefined).map(a => a.latency);
+  const pz = ans.filter(a => a.pauses !== null);
+  const p2 = ans.find(a => a.part === 2);
+  return {
+    answers: ans.length, words, speakTime: Math.round(ans.reduce((s, a) => s + (a.dur || 0), 0)),
+    wpm: span > 5 ? Math.round(words / span * 60) : null,
+    fillers: per.reduce((s, m) => s + m.fillers, 0), discourse: per.reduce((s, m) => s + m.discourse, 0),
+    pauses: pz.length ? pz.reduce((s, a) => s + a.pauses, 0) : null,
+    longest: pz.length ? Math.max(0, ...pz.map(a => a.longest || 0)) : null,
+    latency: lat.length ? +(lat.reduce((s, x) => s + x, 0) / lat.length).toFixed(1) : null,
+    uniq, content: all.length, variety: all.length ? Math.round(uniq / all.length * 100) : null,
+    p2len: p2 ? Math.round(p2.span || p2.dur) : null,
+    conf: (() => { const c = ans.filter(a => a.conf != null).map(a => a.conf); return c.length ? Math.round(c.reduce((s, x) => s + x, 0) / c.length * 100) : null })(),
+    avgWords: (part) => { const xs = ans.filter(a => a.part === part); return xs.length ? Math.round(xs.reduce((s, a) => s + metricsOf(a).words, 0) / xs.length) : null }
+  };
+}
+const ieltsRound = x => Math.floor(x * 2 + 0.5) / 2;
+
+/* ---------- Marking ---------- */
+async function finishExam(){
+  const ex = exam; if (!ex) return;
+  exam = null; clearInterval(ex.clock); if (current) current.abort();
+  if (synth) synth.cancel(); releaseMic();
+  const rep = $('spkReport'); showSpk('spkReport');
+  rep.innerHTML = `<div class="marking"><span class="spin"></span><h2>The examiner is marking your test</h2><p class="meta" id="markMsg">Transcribing your answers…</p></div>`;
+  await Promise.all(ex.pending);
+  ex.answers.forEach(a => { if (!a.transcript) a.transcript = '' });
+  const session = { id: Date.now().toString(36), date: new Date().toISOString(), label: ex.plan.label, mode: ex.plan.mode, engine: ex.engine, accent: $('accent').value,
+    answers: ex.answers.map(a => ({ part: a.part, q: a.q, shortQ: a.shortQ, transcript: a.transcript, dur: a.dur, span: a.span, latency: a.latency, pauses: a.pauses, longest: a.longest, conf: a.conf, txErr: a.txErr || null, url: a.url })) };
+  await markSession(session);
+}
+async function markSession(session){
+  const rep = $('spkReport');
+  const said = session.answers.filter(a => a.transcript && wordsOf(a.transcript).length >= 3);
+  if (!said.length) {
+    const errs = session.answers.map(a => a.txErr).filter(Boolean);
+    renderReport(session, null, errs[0] || 'No speech was transcribed, so there is nothing to mark. Check the microphone and transcription settings, then try again.');
+    return;
+  }
+  const m = overallMetrics(session.answers);
+  const msg = $('markMsg'); if (msg) msg.textContent = `Assessing ${session.answers.length} answers with ${PROVIDERS[aiProv.value].name}. This can take up to a minute.`;
+  const engineNote = session.engine === 'browser'
+    ? 'Browser speech recognition: it usually removes fillers (um, uh) and can mishear words; it adds little punctuation. Judge hesitation from the timing data, not from missing fillers.'
+    : 'Whisper speech recognition: it keeps most fillers and adds punctuation; it can still mishear accented words.';
+  const qa = session.answers.map((a, i) => {
+    const mm = metricsOf(a);
+    return `#${i + 1} [Part ${a.part}] Q: ${a.q}\n  timing: answered for ${Math.round(a.dur)}s, started speaking after ${a.latency == null ? 'n/a' : a.latency.toFixed(1) + 's'}, ${a.pauses == null ? 'pauses n/a' : a.pauses + ' pauses over 1.2s (longest ' + (a.longest || 0).toFixed(1) + 's)'}, ${mm.words} words${mm.wpm ? ', ' + mm.wpm + ' words/min' : ''}${a.conf != null ? ', recognizer confidence ' + Math.round(a.conf * 100) + '%' : ''}\n  transcript: "${a.transcript || '(no speech)'}"`;
+  }).join('\n\n');
+  const spell = session.accent === 'en-US' ? 'American' : 'British';
+  const prompt = `Candidate's IELTS Speaking ${session.label}. ${session.answers.length} answers.
+Transcription: ${engineNote}
+Overall: ${m.words} words, ${m.wpm ?? 'n/a'} words/min while speaking, average start delay ${m.latency ?? 'n/a'}s, ${m.pauses ?? 'n/a'} long pauses, fillers counted ${m.fillers}, ${m.uniq} different content words${m.p2len ? ', Part 2 long turn lasted ' + m.p2len + 's (target 90-120s)' : ''}.
+
+${qa}
+
+Assess this candidate as a strict, experienced IELTS Speaking examiner using the public band descriptors. Give each criterion a band from 1 to 9 in steps of 0.5:
+- fc = Fluency and Coherence (length of answers, hesitation, pauses, speed, linking, development of ideas)
+- lr = Lexical Resource (range, precision, collocation, idiomatic language, paraphrase)
+- gra = Grammatical Range and Accuracy (complex structures, tense control, error frequency)
+- pron = Pronunciation (only indirect evidence is available: recognizer confidence, words that look misheard, rhythm from timing. Say this is an estimate.)
+Rules: do not inflate. Very short answers (under 15 words in Part 1, under 60 seconds in Part 2) limit fc and lr. If a mistake could be a speech-recognition error, say "(possibly a transcription error)". Quote the candidate's exact words in mistakes. Write corrections in ${spell} English. Find up to 12 real mistakes, most important first.
+Reply with ONE JSON object only, no markdown, in this shape:
+{"bands":{"fc":0,"lr":0,"gra":0,"pron":0},
+"summary":"3-4 sentences overall judgement, addressed to the candidate as 'you'",
+"criteria":{"fc":{"comment":"...","evidence":["short quote or observation"]},"lr":{"comment":"...","evidence":["..."]},"gra":{"comment":"...","evidence":["..."]},"pron":{"comment":"...","evidence":["..."]}},
+"strengths":["..."],
+"mistakes":[{"said":"exact words","better":"corrected version","type":"grammar|vocabulary|collocation|word choice|coherence|pronunciation","why":"one sentence"}],
+"vocabulary":[{"used":"basic word or phrase they used","better":["higher-level option","another"],"example":"example sentence using it"}],
+"answers":[{"n":1,"comment":"1-2 sentences on this answer","tip":"one concrete idea that would have improved it"}],
+"plan":[{"focus":"skill to work on","why":"what in this test shows the need","how":"specific daily practice for the next 2 weeks"}],
+"band7":"For the weakest answer in the test, a natural ${spell}-English answer at band 7.5-8 level (Part 2: about 220 words; others: 50-90 words). Say which question it answers on the first line, e.g. 'Q#3: ...'"}`;
+  try {
+    const text = await callLLM([
+      { role: 'system', content: 'You are a senior, certified IELTS Speaking examiner. You mark strictly and consistently with the official IELTS Speaking band descriptors and give specific, actionable feedback. You always reply with a single valid JSON object.' },
+      { role: 'user', content: prompt }
+    ], { maxTokens: 8000, timeout: 180000 });
+    const r = parseObj(text);
+    if (!r || !r.bands) throw new Error('The examiner’s reply could not be read. Try marking again, or choose another model in AI settings.');
+    ['fc', 'lr', 'gra', 'pron'].forEach(k => { let v = Number(r.bands[k]); if (!isFinite(v)) v = 0; r.bands[k] = Math.max(1, Math.min(9, Math.round(v * 2) / 2)) });
+    r.overall = ieltsRound((r.bands.fc + r.bands.lr + r.bands.gra + r.bands.pron) / 4);
+    session.report = r;
+    saveHistory(session);
+    renderReport(session, r);
+  } catch (e) {
+    renderReport(session, null, e.message);
+  }
+}
+
+/* ---------- Report ---------- */
+const CRIT = [['fc', 'Fluency & coherence'], ['lr', 'Lexical resource'], ['gra', 'Grammar range & accuracy'], ['pron', 'Pronunciation*']];
+function grade(kind, v){
+  if (v == null) return '';
+  if (kind === 'wpm') return v >= 110 && v <= 170 ? '<em class="good">natural pace</em>' : v < 90 ? '<em class="bad">slow</em>' : v < 110 ? '<em class="warn">a little slow</em>' : '<em class="warn">very fast</em>';
+  if (kind === 'lat') return v <= 1.5 ? '<em class="good">quick start</em>' : v <= 3 ? '<em class="warn">some hesitation</em>' : '<em class="bad">long hesitation</em>';
+  if (kind === 'p2') return v >= 100 ? '<em class="good">full long turn</em>' : v >= 60 ? '<em class="warn">aim for 1:40+</em>' : '<em class="bad">too short</em>';
+  if (kind === 'pz') return v <= 3 ? '<em class="good">few</em>' : v <= 8 ? '<em class="warn">several</em>' : '<em class="bad">many</em>';
+  return '';
+}
+function renderReport(s, r, err){
+  const rep = $('spkReport'); const m = overallMetrics(s.answers);
+  const d = new Date(s.date);
+  const tile = (val, lbl, g = '') => `<div class="mtile"><b>${val ?? '–'}</b><span>${lbl}</span>${g}</div>`;
+  let h = `<div class="drillhead"><div><div class="eyebrow">${esc(s.label)} · ${d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div><h2>Examiner's report</h2></div></div>`;
+  if (err) h += `<div class="note" style="border-color:var(--bad);color:var(--bad)"><b>The test could not be marked.</b> ${esc(err)}</div>`;
+  if (r) {
+    h += `<div class="rhero"><div class="plate"><span>Overall band</span><b>${r.overall.toFixed(1)}</b><span>estimated</span></div>
+      <div class="crit">${CRIT.map(([k, n]) => `<div class="crow"><span>${n}</span><div class="track"><i style="width:${r.bands[k] / 9 * 100}%"></i></div><b>${r.bands[k].toFixed(1)}</b></div>`).join('')}
+      <div class="scale"><span></span><div><span>0</span><span>3</span><span>6</span><span>9</span></div><span></span></div></div></div>`;
+    if (r.summary) h += `<div class="rsec"><p>${esc(r.summary)}</p></div>`;
+  }
+  h += `<div class="rsec"><h3>How you spoke</h3><div class="mgrid">
+    ${tile(m.wpm, 'words per minute', grade('wpm', m.wpm))}
+    ${tile(m.words, 'words spoken')}
+    ${tile(m.latency != null ? m.latency + 's' : null, 'average time to start', grade('lat', m.latency))}
+    ${m.pauses != null ? tile(m.pauses, 'pauses longer than 1.2 s', grade('pz', m.pauses / Math.max(1, m.answers) * 3)) : ''}
+    ${tile(s.engine === 'groq' ? m.fillers : 'n/a', s.engine === 'groq' ? 'um / uh fillers' : 'fillers (browser hides them)')}
+    ${tile(m.uniq, 'different content words')}
+    ${m.p2len != null ? tile(fmt(m.p2len), 'Part 2 long turn', grade('p2', m.p2len)) : ''}
+    ${m.conf != null ? tile(m.conf + '%', 'recognizer confidence') : ''}
+  </div></div>`;
+  if (r && r.criteria) h += `<div class="rsec"><h3>Criteria in detail</h3><div class="critnotes">${CRIT.map(([k, n]) => { const c = r.criteria[k] || {}; return `<div class="cn"><h4><span>${n}</span><span>${r.bands[k].toFixed(1)}</span></h4><div style="font-size:14.5px">${esc(c.comment || '')}</div>${(c.evidence || []).length ? `<ul>${c.evidence.slice(0, 4).map(e => `<li>${esc(String(e))}</li>`).join('')}</ul>` : ''}</div>` }).join('')}</div></div>`;
+  if (r && (r.strengths || []).length) h += `<div class="rsec"><h3>What you did well</h3><ul class="plan" style="list-style:disc">${r.strengths.map(x => `<li>${esc(String(x))}</li>`).join('')}</ul></div>`;
+  if (r && (r.mistakes || []).length) h += `<div class="rsec"><h3>Mistakes to fix</h3><ul class="mlist">${r.mistakes.map(x => `<li><span class="mt">${esc(x.type || 'language')}</span><span class="said">${esc(x.said || '')}</span><span class="better">→ ${esc(x.better || '')}</span><span class="why">${esc(x.why || '')}</span></li>`).join('')}</ul></div>`;
+  if (r && (r.vocabulary || []).length) h += `<div class="rsec"><h3>Vocabulary upgrades</h3><div class="vocab">${r.vocabulary.map(v => `<div><span class="from">${esc(v.used || '')}</span> → <span class="to">${esc([].concat(v.better || []).join(', '))}</span>${v.example ? `<div class="meta" style="margin-top:4px">${esc(v.example)}</div>` : ''}</div>`).join('')}</div></div>`;
+  h += `<div class="rsec qa"><h3>Your answers</h3>${s.answers.map((a, i) => {
+    const mm = metricsOf(a), fb = r && (r.answers || []).find(x => Number(x.n) === i + 1);
+    return `<details ${i === 0 ? 'open' : ''}><summary><span class="qn">#${i + 1} · P${a.part}</span><span>${esc(a.shortQ || a.q)}</span></summary>
+      <div class="tr">${a.transcript ? esc(a.transcript) : '<span class="meta">' + esc(a.txErr || 'No speech was picked up.') + '</span>'}</div>
+      <div class="qm">${Math.round(a.dur)}s · ${mm.words} words${mm.wpm ? ' · ' + mm.wpm + ' wpm' : ''}${a.latency != null ? ' · started after ' + a.latency.toFixed(1) + 's' : ''}${a.pauses != null ? ' · ' + a.pauses + ' long pauses' : ''}</div>
+      ${a.url ? `<audio controls preload="none" src="${a.url}"></audio>` : ''}
+      ${fb ? `<p style="margin:8px 0 0">${esc(fb.comment || '')}</p>${fb.tip ? `<p class="meta" style="margin:4px 0 0"><b>Try:</b> ${esc(fb.tip)}</p>` : ''}` : ''}
+    </details>` }).join('')}</div>`;
+  if (r && (r.plan || []).length) h += `<div class="rsec"><h3>Your improvement plan</h3><ol class="plan">${r.plan.map(p => `<li><b>${esc(p.focus || '')}</b>${p.why ? `<span class="meta">${esc(p.why)}</span><br>` : ''}${esc(p.how || '')}</li>`).join('')}</ol></div>`;
+  if (r && r.band7) h += `<div class="rsec"><h3>A band 7.5–8 model answer</h3><div class="model">${esc(String(r.band7))}</div></div>`;
+  h += `<div class="caveat">* Bands are an AI estimate based on the IELTS public band descriptors, not an official result. Pronunciation can only be judged indirectly from speech-recognition confidence and timing. Transcription mistakes can be mistaken for your mistakes.</div>
+  <div class="row noprint">
+    <button class="btn btn-primary" id="rpNew" type="button">New test</button>
+    ${err && s.answers.some(a => a.transcript) ? '<button class="btn btn-ghost" id="rpRetry" type="button">Try marking again</button>' : ''}
+    ${r ? '<button class="btn btn-ghost" id="rpCopy" type="button">Copy report</button>' : ''}
+    ${window.self === window.top && r ? '<button class="btn btn-ghost" id="rpPrint" type="button">Print / save as PDF</button>' : ''}
+    <button class="btn btn-ghost" id="rpHome" type="button">Back to flashcards</button>
+    <span class="meta" id="rpMsg"></span>
+  </div>`;
+  rep.innerHTML = h;
+  $('rpNew').onclick = () => { showSpk('home'); startExam(planFor(spkMode)) };
+  $('rpHome').onclick = () => { showSpk('home'); renderHistory() };
+  if ($('rpRetry')) $('rpRetry').onclick = () => { rep.innerHTML = '<div class="marking"><span class="spin"></span><h2>The examiner is marking your test</h2><p class="meta" id="markMsg"></p></div>'; markSession(s) };
+  if ($('rpCopy')) $('rpCopy').onclick = async () => { const t = reportText(s, r); try { await navigator.clipboard.writeText(t); $('rpMsg').textContent = 'Report copied.' } catch (e) { const ta = document.createElement('textarea'); ta.value = t; rep.appendChild(ta); ta.select(); $('rpMsg').textContent = 'Select all and copy the text below.' } };
+  if ($('rpPrint')) $('rpPrint').onclick = () => window.print();
+}
+function reportText(s, r){
+  const L = [`IELTS Speaking report — ${s.label} — ${new Date(s.date).toLocaleString()}`, `Overall band (estimate): ${r.overall}`, ...CRIT.map(([k, n]) => `${n.replace('*', '')}: ${r.bands[k]}`), '', r.summary || ''];
+  if ((r.mistakes || []).length) { L.push('', 'Mistakes:'); r.mistakes.forEach(x => L.push(`- "${x.said}" → "${x.better}" (${x.type}) ${x.why || ''}`)) }
+  if ((r.vocabulary || []).length) { L.push('', 'Vocabulary upgrades:'); r.vocabulary.forEach(v => L.push(`- ${v.used} → ${[].concat(v.better || []).join(', ')}`)) }
+  if ((r.plan || []).length) { L.push('', 'Improvement plan:'); r.plan.forEach((p, i) => L.push(`${i + 1}. ${p.focus}: ${p.how}`)) }
+  L.push('', 'Answers:'); s.answers.forEach((a, i) => L.push(`#${i + 1} (Part ${a.part}) ${a.shortQ || a.q}`, `   ${a.transcript || '(no speech)'}`));
+  return L.join('\n');
+}
+
+/* ---------- History ---------- */
+function saveHistory(s){
+  const hist = store.get('spkHist', []);
+  const lite = { ...s, answers: s.answers.map(a => ({ ...a, url: null })) };
+  hist.unshift(lite); store.set('spkHist', hist.slice(0, 30)); renderHistory();
+}
+function renderHistory(){
+  const hist = store.get('spkHist', []), ul = $('spkHist');
+  $('spkHistSec').hidden = !hist.length || $('spkHome').hidden;
+  ul.innerHTML = hist.map((s, i) => {
+    const r = s.report || {}, b = r.bands || {};
+    const d = new Date(s.date);
+    return `<li><span class="bandpill">${r.overall != null ? Number(r.overall).toFixed(1) : '–'}</span><span class="hmeta"><b>${esc(s.label)}</b><span class="meta">${d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} · FC ${b.fc ?? '–'} · LR ${b.lr ?? '–'} · GRA ${b.gra ?? '–'} · P ${b.pron ?? '–'}</span></span><button class="btn btn-ghost btn-sm" data-hist="${i}" type="button">Open</button></li>`;
+  }).join('');
+}
+$('spkHist').addEventListener('click', e => { const b = e.target.closest('[data-hist]'); if (!b) return; const s = store.get('spkHist', [])[Number(b.dataset.hist)]; if (s) { showSpk('spkReport'); renderReport(s, s.report) } });
+renderHistory();
+showSpk('home');
+route();
 })();
 </script>
 </body>
