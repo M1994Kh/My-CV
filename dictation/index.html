@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -146,6 +146,57 @@ footer{text-align:center;color:var(--muted);font-size:13px}
 .status.err{color:var(--bad)} .status.ok{color:var(--good)} .status.wait{color:var(--muted)}
 .spin{width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:sp .7s linear infinite;vertical-align:-2px}
 @keyframes sp{to{transform:rotate(360deg)}}
+
+/* Definition card */
+.listen{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%}
+.defcard{width:100%;max-width:560px;background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.defcard[hidden]{display:none!important}
+.defhead{display:flex;align-items:center;gap:8px}
+.pos{font:600 12px var(--f-mono);color:var(--cobalt);background:var(--cobalt-soft);border-radius:99px;padding:1px 8px}
+.pos:empty{display:none}
+.deftext{font-size:16px;line-height:1.45;color:var(--ink);overflow-wrap:anywhere}
+.deftext .blank{font-family:var(--f-mono);color:var(--muted);letter-spacing:.05em}
+.deftext.dim{color:var(--muted);font-size:14.5px}
+.iconbtn{display:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);font-size:16px;cursor:pointer}
+.headr{gap:10px}
+
+/* On-screen keyboard */
+.kbd{display:flex;flex-direction:column;gap:7px;padding:8px 5px;background:var(--rule);user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.krow{display:flex;gap:5px;justify-content:center}
+.key{flex:1 1 0;min-width:0;height:var(--keyh,50px);border:0;border-radius:8px;background:var(--sheet);color:var(--ink);font:600 21px var(--f-mono);box-shadow:0 1px 0 rgba(22,35,61,.25);cursor:pointer;display:grid;place-items:center;padding:0;-webkit-tap-highlight-color:transparent}
+.key.fn{background:var(--paper);font:700 14px var(--f-body);flex-grow:1.5}
+.key.space{flex-grow:4.5;font:600 13px var(--f-body);color:var(--muted)}
+.key.enter{flex-grow:2.2;background:var(--cobalt);color:var(--sheet);font:700 15px var(--f-body)}
+.key.on{background:var(--cobalt-soft);color:var(--cobalt)}
+.key.down{transform:translateY(1px);filter:brightness(.92)}
+.key svg{width:24px;height:24px}
+
+/* Split screen while drilling on a touch device */
+body.drilling{overflow:hidden}
+body.drilling #drill{position:fixed;left:0;right:0;top:var(--vvtop,0px);height:var(--vvh,100dvh);z-index:30;margin:0;border:0;border-radius:0;box-shadow:none;padding:0;gap:0;display:flex;flex-direction:column}
+body.drilling .dtop{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:12px;
+  padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:12px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body.drilling .kbd{flex:none;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));
+  padding-left:max(5px,env(safe-area-inset-left,0px));padding-right:max(5px,env(safe-area-inset-right,0px))}
+body.drilling .drillhead h2{font-size:18px}
+body.drilling .iconbtn{display:grid;place-items:center}
+body.drilling #quitBtn,body.drilling .keyhint{display:none}
+body.drilling .stage{gap:12px;padding:0;flex:1 1 auto;justify-content:center}
+body.drilling .speak svg{width:46%;height:46%}
+body.drilling .deftext{font-size:17px}
+body.drilling .answer{min-height:58px}
+body.drilling .listen{flex-direction:row;align-items:stretch;gap:12px}
+body.drilling .speakers{flex-direction:column;gap:10px;justify-content:center}
+body.drilling .speak{width:66px;height:66px}
+body.drilling .speak.small{width:46px;height:46px;align-self:center}
+body.drilling .defcard{max-width:none;flex:1;justify-content:center}
+body.drilling .answer{font-size:24px;padding:10px 12px;caret-color:var(--cobalt)}
+body.drilling .feedback{min-height:0}
+body.drilling .dctrl{margin-top:auto}
+body.drilling.oskbd #checkBtn{display:none}
+body.drilling .study{padding:0}
+@media (max-height:640px){body.drilling .speak{width:54px;height:54px}body.drilling .speak.small{width:40px;height:40px}body.drilling .deftext{font-size:15px}}
 @media (max-width:520px){.sheet{padding:18px}.stats{grid-template-columns:1fr 1fr 1fr}.stat b{font-size:24px}
   .mistakes li,.colhead{grid-template-columns:minmax(0,1fr) auto}.mistakes .you,.colhead .c2{display:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -228,7 +279,12 @@ footer{text-align:center;color:var(--muted);font-size:13px}
         <div class="row">
           <button type="button" class="btn btn-ghost" id="aiTest">Test connection</button>
           <button type="button" class="btn btn-ghost" id="aiForget">Clear word history</button>
-          <span class="meta" id="aiSeen"></span>
+          <button type="button" class="btn btn-ghost" id="bankClear">Clear saved word bank</button>
+        </div>
+        <div class="meta" id="aiSeen"></div>
+        <div class="meta" id="bankInfo"></div>
+        <label class="meta" style="font-weight:400;display:flex;gap:6px;align-items:center"><input type="checkbox" id="aiFresh"> Always ask the AI (skip saved words)</label>
+        <div class="row" hidden>
         </div>
       </div>
     </div>
@@ -263,6 +319,10 @@ footer{text-align:center;color:var(--muted);font-size:13px}
         <input type="range" id="rate" min="0.5" max="1.4" step="0.05" value="0.9">
       </div>
       <div class="field">
+        <label for="kbdMode">Keyboard on phones &amp; tablets</label>
+        <select id="kbdMode"><option value="auto" selected>Built-in, no autocorrect (touch screens)</option><option value="on">Built-in on every device</option><option value="off">My device's keyboard</option></select>
+      </div>
+      <div class="field">
         <label for="repeat">Say each item</label>
         <select id="repeat"><option value="1">Once</option><option value="2" selected>Twice</option><option value="3">Three times</option></select>
       </div>
@@ -283,32 +343,41 @@ footer{text-align:center;color:var(--muted);font-size:13px}
 
   <!-- DRILL -->
   <section class="sheet" id="drill" hidden>
-    <div class="drillhead">
-      <div><div class="eyebrow" id="drillMode">Dictation</div><h2 id="drillTitle">Type what you hear</h2></div>
-      <span class="count" id="count">1 / 20</span>
-    </div>
-    <div class="progress"><i id="bar"></i></div>
-    <div class="stage">
-      <div class="speakers">
-        <button class="speak" id="playBtn" type="button" aria-label="Play again">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
-        </button>
-        <button class="speak small" id="slowBtn" type="button" aria-label="Play slowly" title="Play slowly">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-        </button>
+    <div class="dtop" id="dtop">
+      <div class="drillhead">
+        <div><div class="eyebrow" id="drillMode">Dictation</div><h2 id="drillTitle">Type what you hear</h2></div>
+        <div class="row headr"><span class="count" id="count">1 / 20</span><button class="iconbtn" id="quitX" type="button" aria-label="End session">✕</button></div>
       </div>
-      <div id="studyBox" class="study" hidden></div>
-      <input class="answer" id="answer" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Type here, then press Enter">
-      <div class="tries" id="tries"></div>
-      <div class="feedback info" id="feedback"></div>
+      <div class="progress"><i id="bar"></i></div>
+      <div class="stage">
+        <div class="listen">
+          <div class="speakers">
+            <button class="speak" id="playBtn" type="button" aria-label="Play again">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
+            </button>
+            <button class="speak small" id="slowBtn" type="button" aria-label="Play slowly" title="Play slowly">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            </button>
+          </div>
+          <div class="defcard" id="defCard" aria-live="polite">
+            <div class="defhead"><span class="eyebrow">Meaning</span><span class="pos" id="defPos"></span></div>
+            <div class="deftext" id="defText"></div>
+          </div>
+        </div>
+        <div id="studyBox" class="study" hidden></div>
+        <input class="answer" id="answer" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Type here, then press Enter">
+        <div class="tries" id="tries"></div>
+        <div class="feedback info" id="feedback"></div>
+      </div>
+      <div class="row dctrl">
+        <button class="btn btn-ghost" id="revealBtn" type="button">Show answer</button>
+        <button class="btn btn-ghost" id="quitBtn" type="button">End session</button>
+        <span class="spacer"></span>
+        <button class="btn btn-primary" id="checkBtn" type="button">Check ↵</button>
+      </div>
+      <div class="meta keyhint"><kbd>Enter</kbd> check · <kbd>Esc</kbd> play again · <kbd>Shift</kbd>+<kbd>Esc</kbd> play slowly</div>
     </div>
-    <div class="row">
-      <button class="btn btn-ghost" id="revealBtn" type="button">Show answer</button>
-      <button class="btn btn-ghost" id="quitBtn" type="button">End session</button>
-      <span class="spacer"></span>
-      <button class="btn btn-primary" id="checkBtn" type="button">Check ↵</button>
-    </div>
-    <div class="meta"><kbd>Enter</kbd> check · <kbd>Esc</kbd> play again · <kbd>Shift</kbd>+<kbd>Esc</kbd> play slowly</div>
+    <div class="kbd" id="kbd" hidden></div>
   </section>
 
   <!-- RESULTS -->
@@ -483,7 +552,7 @@ let tries = 0, revealed = false, locked = false;
 let log = new Map();   // item -> {attempts:[], wrong:boolean, firstTry:boolean}
 let sessionItems = [];
 
-function show(id){ ['setup','drill','results'].forEach(s => $(s).hidden = s !== id); window.scrollTo({top:0, behavior:'smooth'}) }
+function show(id){ ['setup','drill','results'].forEach(s => $(s).hidden = s !== id); document.body.classList.toggle('drilling', id === 'drill' && splitLayout()); if (id === 'drill') { applyInputMode(); fitViewport() } window.scrollTo({top:0, behavior:'smooth'}) }
 const shuffle = arr => { arr = arr.slice(); for (let i = arr.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [arr[i],arr[j]] = [arr[j],arr[i]] } return arr };
 
 function startSession(items){
@@ -507,15 +576,18 @@ function loadItem(){
   a.placeholder = unit === 'sentence' && item.includes(' ') ? 'Type the whole sentence, then press Enter' : 'Type here, then press Enter';
   renderTries(); setFeedback('', 'info');
   $('revealBtn').hidden = phase !== 'drill';
+  showDef(item);
   const study = $('studyBox');
   if (phase === 'review') {
     study.hidden = false; renderStudy(item, false);
     a.hidden = true; $('checkBtn').textContent = 'I’m ready to type';
     setFeedback('Listen to the word and watch how it is spelled.', 'info');
+    if (useOSK()) buildKbd();
     playStudy(item);
   } else {
     study.hidden = true; a.hidden = false; $('checkBtn').textContent = 'Check ↵';
-    a.focus();
+    if (useOSK()) buildKbd();
+    focusAnswer();
     setTimeout(() => speak(item, {times: Number($('repeat').value)}), 250);
   }
 }
@@ -570,7 +642,7 @@ function beginRecall(){
   const item = queue[pos];
   if (synth) synth.cancel(); speakToken++;
   renderStudy(item, true);
-  const a = $('answer'); a.hidden = false; a.value = ''; a.className = 'answer'; a.focus();
+  const a = $('answer'); a.hidden = false; a.value = ''; a.className = 'answer'; if (useOSK()) buildKbd(); focusAnswer();
   $('checkBtn').textContent = 'Check ↵';
   setFeedback('Now type it from memory.', 'info');
   speak(item, {times: 1});
@@ -598,14 +670,14 @@ function check(){
     setFeedback(`Not yet. It's spelled <span class="reveal">${esc(item)}</span><br><span class="diff" style="font-family:var(--f-mono);font-weight:400">${diffHTML(typed.trim(), item)}</span>`, 'bad');
     renderStudy(item, false);
     speak(item, {letters: true, onLetter: i => document.querySelectorAll('#letters span').forEach(s => s.classList.toggle('lit', Number(s.dataset.i) === i))});
-    a.select();
+    if (!useOSK()) a.select();
     return;
   }
   if (tries === 1) { setFeedback('Not quite. Listen again and fix it.', 'bad'); speak(item, {times:1}) }
   else if (tries === 2) { setFeedback(`Hint: <span class="hint">${esc(hintFor(item,1))}</span>`, 'bad'); speak(item, {rateMul: 0.7}) }
   else if (tries === 3) { setFeedback(`Closer hint: <span class="hint">${esc(hintFor(item,2))}</span>`, 'bad'); speak(item, {rateMul: 0.7}) }
   else revealAnswer();
-  a.select();
+  if (!useOSK()) a.select();
 }
 function revealAnswer(){
   const item = queue[pos], rec = log.get(item), typed = $('answer').value.trim();
@@ -613,7 +685,7 @@ function revealAnswer(){
   revealed = true; rec.wrong = true; rec.firstTry = false;
   setFeedback(`The answer is <span class="reveal">${esc(item)}</span><span style="font-weight:400">Type it correctly to continue.</span>`, 'bad');
   speak(item, {times:1});
-  $('answer').value = ''; $('answer').focus();
+  $('answer').value = ''; focusAnswer();
 }
 function advance(){
   pos++;
@@ -780,38 +852,80 @@ function parseList(text){
   let arr = null;
   if (m) { try { arr = JSON.parse(m[0]) } catch(e) {} }
   if (!Array.isArray(arr)) arr = text.split(/\n+/).map(l => l.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, '').replace(/^["']|["'],?$/g, ''));
-  return arr.map(x => (typeof x === 'string' ? x : (x && (x.word || x.text || x.sentence)) || '').trim()).filter(x => x && x.length < 200);
+  return arr.map(x => {
+    if (typeof x === 'string') { const [w, d] = x.split(/\s+[–—:-]\s+/); return { w: (w||'').trim(), d: (d||'').trim(), p: '' } }
+    if (!x || typeof x !== 'object') return { w:'' };
+    return { w: String(x.w || x.word || x.text || x.sentence || '').trim(), d: String(x.d || x.definition || x.meaning || '').trim(), p: String(x.p || x.pos || x.partOfSpeech || '').trim() };
+  }).filter(x => x.w && x.w.length < 200);
 }
+
+/* ---------- Saved word bank (cache of everything the AI has produced) ---------- */
+const getBank = () => store.get('bank', {});
+function saveBank(b){
+  const entries = Object.entries(b);
+  if (entries.length > 3000) { entries.sort((x, y) => (x[1].t || 0) - (y[1].t || 0)); b = Object.fromEntries(entries.slice(-3000)) }
+  store.set('bank', b); showBank();
+}
+function bankKey(o){ return [o.accent, o.unit, o.level, o.topic.toLowerCase()].join('|') }
+function showBank(){
+  const b = Object.values(getBank()), seen = new Set(getSeen().map(s => s.toLowerCase()));
+  const fresh = b.filter(x => !seen.has(x.w.toLowerCase())).length;
+  $('bankInfo').textContent = b.length ? `Word bank: ${b.length} words saved from the AI, ${fresh} not practised yet. These are used first, so the AI is only asked when they run out.` : 'Word bank is empty. Words the AI sends are saved here for later sessions.';
+}
+showBank();
+$('bankClear').onclick = () => { store.set('bank', {}); showBank(); aiStatus('Saved word bank cleared.', 'ok') };
+$('aiFresh').checked = store.get('aiFresh', false); $('aiFresh').onchange = () => store.set('aiFresh', $('aiFresh').checked);
+
 async function generateWords(){
   const btn = $('aiGo');
   const topic = $('aiTopic').value === 'custom' ? ($('aiCustom').value.trim() || 'general English') : $('aiTopic').value;
   const n = Number($('aiCount').value), level = $('aiLevel').value, sent = unit === 'sentence';
-  const seen = getSeen();
-  const avoid = seen.slice(-300).join(', ');
-  const us = $('accent').value === 'en-US';
+  const accent = $('accent').value, ctx = { accent, unit, level, topic }, key = bankKey(ctx);
+  const seen = getSeen(), seenSet = new Set(seen.map(s => s.toLowerCase()));
+  const bank = getBank();
+  const pool = shuffle(Object.values(bank).filter(x => x.k === key && !seenSet.has(x.w.toLowerCase())));
+  const finish = (items, msg) => {
+    src.value = items.map(x => x.w).join('\n'); markPreset(null); updateInfo();
+    aiStatus(msg + ($('aiAuto').checked ? '' : ' Press Start when you are ready.'), 'ok');
+    if ($('aiAuto').checked) startSession(parseItems(src.value));
+  };
+  // 1. Enough unused words already saved: no AI call at all
+  if (!$('aiFresh').checked && pool.length >= n) {
+    const left = pool.length - n;
+    finish(pool.slice(0, n), `${n} ${sent ? 'sentences' : 'words'} loaded from your word bank, with no AI request. ${left ? left + ' more saved for this topic.' : 'That was the last of them; the next set will come from the AI.'}`);
+    return;
+  }
+  // 2. Ask for a bigger batch than needed and keep the rest for next time
+  const ask = Math.min(50, Math.max(n * 2, 30));
+  const known = [...new Set([...seen.slice(-250), ...Object.values(bank).filter(x => x.k === key).map(x => x.w)])].slice(-350);
+  const us = accent === 'en-US';
   const spellName = us ? 'American English' : 'British English';
   const spellEx = us ? 'e.g. color, center, organize, traveled, program, defense' : 'e.g. colour, centre, organise, travelled, programme, defence';
   const prompt = sent
-    ? `Write ${n} natural English sentences for dictation practice at CEFR ${level} level on the topic "${topic}". Each sentence is 7 to 16 words and contains at least one word that learners often misspell from hearing. Use ${spellName} spelling and vocabulary only. Avoid sentences built around these already-practised words: ${avoid || 'none'}.\nReturn ONLY a JSON array of strings.`
-    : `List ${n} English words or short fixed phrases for spelling dictation at CEFR ${level} level on the topic "${topic}". Choose words that are useful and easy to misspell from hearing (silent letters, double consonants, tricky vowels, -ible/-able, -ance/-ence). Mix lengths. Use ${spellName} spelling only (${spellEx}). No proper names unless the topic needs them. Do NOT include any of these already-practised words: ${avoid || 'none'}.\nReturn ONLY a JSON array of strings, like ["word","word"].`;
+    ? `Write ${ask} natural English sentences for dictation practice at CEFR ${level} level on the topic "${topic}". Each sentence is 7 to 16 words and contains at least one word that learners often misspell from hearing. Use ${spellName} spelling and vocabulary only. Do not reuse these sentences or build them around these words: ${known.join(' | ') || 'none'}.\nReturn ONLY a JSON array of objects: [{"w":"the sentence","d":"a short hint about its meaning, max 12 words"}].`
+    : `List ${ask} English words or short fixed phrases for spelling dictation at CEFR ${level} level on the topic "${topic}". Choose words that are useful and easy to misspell from hearing (silent letters, double consonants, tricky vowels, -ible/-able, -ance/-ence). Mix lengths. Use ${spellName} spelling only (${spellEx}). No proper names unless the topic needs them. Do NOT include any of these words: ${known.join(', ') || 'none'}.\nFor each word give its part of speech and a simple learner's dictionary definition of at most 14 words. The definition must NOT contain the word itself or any form of it.\nReturn ONLY a JSON array of objects: [{"w":"word","p":"noun","d":"definition"}].`;
   btn.disabled = true;
-  aiStatus(`<span class="spin"></span> Asking ${PROVIDERS[aiProv.value].name} for ${n} new ${sent ? 'sentences' : 'words'}…`, 'wait');
+  aiStatus(`<span class="spin"></span> ${pool.length ? `Using ${pool.length} saved words and asking` : 'Asking'} ${PROVIDERS[aiProv.value].name} for more…`, 'wait');
   try {
     const text = await callLLM([
-      { role:'system', content:'You create vocabulary for English dictation and spelling practice, strictly following the requested spelling standard (American or British). You always answer with a JSON array of strings and nothing else.' },
+      { role:'system', content:'You create vocabulary for English dictation and spelling practice, strictly following the requested spelling standard (American or British). You always answer with a JSON array and nothing else.' },
       { role:'user', content: prompt }
-    ]);
-    const have = new Set(seen.map(s => s.toLowerCase()));
-    let items = parseList(text);
-    if (!sent) items = items.map(w => w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, ''));
+    ], { maxTokens: 6000 });
+    const have = new Set([...seenSet, ...Object.values(bank).filter(x => x.k === key).map(x => x.w.toLowerCase())]);
     const uniq = new Set();
-    items = items.filter(w => { const k = w.toLowerCase(); if (!w || uniq.has(k) || (!sent && have.has(k))) return false; uniq.add(k); return true }).slice(0, n);
+    let got = parseList(text).map(x => ({ ...x, w: sent ? x.w : x.w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '') }))
+      .filter(x => { const k = x.w.toLowerCase(); if (!x.w || uniq.has(k) || have.has(k)) return false; uniq.add(k); return true });
+    const now = Date.now();
+    got.forEach(x => { bank[x.w.toLowerCase()] = { w: x.w, d: x.d, p: x.p, k: key, t: now } });
+    saveBank(bank);
+    const fromBank = $('aiFresh').checked ? [] : pool;
+    const items = [...got, ...fromBank].slice(0, n);
     if (!items.length) throw new Error('The AI only suggested words you have already practised. Try another topic or level, or clear the word history.');
-    src.value = items.join('\n'); markPreset(null); updateInfo();
-    aiStatus(`${items.length} new ${sent ? 'sentences' : 'words'} ready on “${esc(topic)}”.${$('aiAuto').checked ? '' : ' Press Start when you are ready.'}`, 'ok');
-    if ($('aiAuto').checked) startSession(parseItems(src.value));
+    const usedNew = Math.min(got.length, n), usedOld = items.length - usedNew, saved = Math.max(0, got.length - usedNew) + Math.max(0, fromBank.length - usedOld);
+    finish(items, `${items.length} ${sent ? 'sentences' : 'words'} ready on “${esc(topic)}” (${usedNew} new from the AI${usedOld ? `, ${usedOld} from your word bank` : ''}). ${saved ? saved + ' extra saved for next time.' : ''}`);
   } catch (e) {
-    aiStatus(esc(e.message), 'err');
+    if (pool.length && !$('aiFresh').checked) { finish(pool.slice(0, n), `The AI could not be reached, so ${Math.min(n, pool.length)} saved words were loaded instead. (${esc(e.message)})`); }
+    else aiStatus(esc(e.message), 'err');
   } finally { btn.disabled = false }
 }
 $('aiGo').onclick = generateWords;
@@ -821,15 +935,151 @@ $('aiTest').onclick = async () => {
   catch (e) { aiStatus(esc(e.message), 'err') }
 };
 
+/* ---------- Definitions (word bank → cached dictionary → free dictionary API) ---------- */
+const defCache = store.get('defs', {});
+const defInflight = new Map();
+async function getDef(item){
+  const k = item.toLowerCase();
+  const b = getBank()[k];
+  if (b && b.d) return { d: b.d, p: b.p };
+  if (defCache[k]) return defCache[k];
+  if (unit === 'sentence' && item.includes(' ')) return null;
+  if (defInflight.has(k)) return defInflight.get(k);
+  const pr = (async () => {
+    const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 8000);
+    try {
+      const r = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(k), { signal: ctrl.signal });
+      if (r.status === 404) { defCache[k] = { none: true }; store.set('defs', defCache); return defCache[k] }
+      if (!r.ok) return null;
+      const j = await r.json(), m = j[0] && j[0].meanings && j[0].meanings[0];
+      const d = m && m.definitions && m.definitions[0] && m.definitions[0].definition;
+      defCache[k] = d ? { d, p: m.partOfSpeech || '' } : { none: true };
+      const keys = Object.keys(defCache); if (keys.length > 4000) delete defCache[keys[0]];
+      store.set('defs', defCache);
+      return defCache[k];
+    } catch (e) { return null } finally { clearTimeout(t); defInflight.delete(k) }
+  })();
+  defInflight.set(k, pr);
+  return pr;
+}
+function maskDef(text, item){
+  const targets = item.toLowerCase().split(/\s+/).filter(Boolean);
+  return esc(text).replace(/[\p{L}'’-]+/gu, tok => {
+    const t = tok.toLowerCase();
+    const hit = targets.some(w => t === w || (w.length >= 4 && t.startsWith(w.slice(0, Math.max(4, Math.ceil(w.length * 0.6))))));
+    return hit ? '<span class="blank">＿＿＿</span>' : tok;
+  });
+}
+async function showDef(item){
+  const card = $('defCard'), text = $('defText'), pos = $('defPos');
+  const isSentence = unit === 'sentence' && item.includes(' ');
+  card.hidden = false; pos.textContent = ''; text.className = 'deftext dim';
+  text.textContent = isSentence ? '' : 'Looking up the meaning…';
+  const def = await getDef(item);
+  if (queue[pos_()] !== item) return;
+  if (def && def.d && !def.none) {
+    text.className = 'deftext';
+    text.innerHTML = phase === 'review' ? esc(def.d) : maskDef(def.d, item);
+    pos.textContent = def.p || '';
+  } else if (isSentence) {
+    text.textContent = 'Listen to the whole sentence. Punctuation is ' + ($('optPunct').checked ? 'ignored.' : 'checked.');
+  } else {
+    text.textContent = def === null ? 'No meaning available offline. Just listen carefully.' : 'No dictionary entry for this one. Just listen carefully.';
+  }
+  // look up the next word in advance
+  const nx = queue[pos_() + 1]; if (nx) getDef(nx);
+}
+function pos_(){ return pos }
+
+/* ---------- On-screen keyboard and split-screen layout ---------- */
+const isTouch = () => window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 1 && window.matchMedia('(hover: none)').matches;
+const kbdMode = $('kbdMode'); kbdMode.value = store.get('kbdMode', 'auto');
+kbdMode.onchange = () => store.set('kbdMode', kbdMode.value);
+const useOSK = () => kbdMode.value === 'on' || (kbdMode.value === 'auto' && isTouch());
+const splitLayout = () => useOSK() || isTouch();
+let shift = false, layer = 'abc';
+const ICON_BS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H9l-7 7 7 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="m17 9-6 6M11 9l6 6"/></svg>';
+const ICON_SH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 3 12h5v8h8v-8h5z"/></svg>';
+function buildKbd(){
+  const rows = layer === 'abc'
+    ? [['q','w','e','r','t','y','u','i','o','p'], ['a','s','d','f','g','h','j','k','l'], ['⇧','z','x','c','v','b','n','m','⌫'], ['123',"'",'␣','-','↵']]
+    : [['1','2','3','4','5','6','7','8','9','0'], ['.',',','?','!',':',';','"','(',')'], ['abc2','&','/','%','$','@','#','⌫'], ['abc',"'",'␣','-','↵']];
+  const k = $('kbd'); k.innerHTML = '';
+  rows.forEach((r, ri) => {
+    const row = document.createElement('div'); row.className = 'krow';
+    if (layer === 'abc' && ri === 1) row.style.padding = '0 4.5%';
+    r.forEach(c => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'key'; b.dataset.k = c;
+      if (c === '⌫') { b.classList.add('fn'); b.innerHTML = ICON_BS; b.setAttribute('aria-label','Delete') }
+      else if (c === '⇧') { b.classList.add('fn'); b.innerHTML = ICON_SH; b.setAttribute('aria-label','Capital letter'); if (shift) b.classList.add('on') }
+      else if (c === '␣') { b.classList.add('space'); b.textContent = 'space' }
+      else if (c === '↵') { b.classList.add('enter'); b.textContent = phase === 'review' && $('answer').hidden ? 'Ready' : 'Check' }
+      else if (c === '123' || c === 'abc' || c === 'abc2') { b.classList.add('fn'); b.textContent = c === '123' ? '123' : 'abc'; b.dataset.k = c === '123' ? '123' : 'abc' }
+      else b.textContent = shift && layer === 'abc' ? c.toUpperCase() : c;
+      row.appendChild(b);
+    });
+    k.appendChild(row);
+  });
+}
+function typeKey(c){
+  const a = $('answer');
+  if (c === '↵') { check(); return }
+  if (c === '123' || c === 'abc') { layer = c === '123' ? 'sym' : 'abc'; buildKbd(); return }
+  if (c === '⇧') { shift = !shift; buildKbd(); return }
+  if (a.hidden || a.disabled) return;
+  if (c === '⌫') a.value = a.value.slice(0, -1);
+  else { let ch = c === '␣' ? ' ' : c; if (shift) { ch = ch.toUpperCase(); shift = false; buildKbd() } a.value += ch }
+  a.classList.remove('no');
+  a.scrollLeft = a.scrollWidth;
+}
+let bsTimer = null;
+$('kbd').addEventListener('pointerdown', e => {
+  const b = e.target.closest('.key'); if (!b) return;
+  e.preventDefault(); b.classList.add('down');
+  try { navigator.vibrate && navigator.vibrate(6) } catch (er) {}
+  const c = b.dataset.k; typeKey(c);
+  if (c === '⌫') { clearTimeout(bsTimer); bsTimer = setTimeout(function rep(){ typeKey('⌫'); bsTimer = setTimeout(rep, 70) }, 420) }
+});
+const keyUp = () => { clearTimeout(bsTimer); document.querySelectorAll('.key.down').forEach(k => k.classList.remove('down')) };
+['pointerup','pointercancel','pointerleave'].forEach(ev => $('kbd').addEventListener(ev, keyUp));
+
+function applyInputMode(){
+  const a = $('answer'), osk = useOSK();
+  a.readOnly = osk; a.setAttribute('inputmode', osk ? 'none' : 'text');
+  $('kbd').hidden = !osk;
+  document.body.classList.toggle('oskbd', osk);
+  if (osk) buildKbd();
+}
+function focusAnswer(){
+  const a = $('answer'); if (a.hidden) return;
+  if (useOSK()) { a.blur(); return }
+  a.focus({ preventScroll: true });
+}
+// keep the split layout sized to the visible area, above the device keyboard when it is open
+function fitViewport(){
+  const vv = window.visualViewport; const r = document.documentElement.style;
+  if (vv) { r.setProperty('--vvh', vv.height + 'px'); r.setProperty('--vvtop', vv.offsetTop + 'px') }
+  const h = vv ? vv.height : window.innerHeight;
+  r.setProperty('--keyh', Math.round(Math.max(40, Math.min(56, h * 0.068))) + 'px');
+}
+if (window.visualViewport) { visualViewport.addEventListener('resize', fitViewport); visualViewport.addEventListener('scroll', fitViewport) }
+window.addEventListener('resize', fitViewport); fitViewport();
+
 /* --- controls --- */
 $('checkBtn').onclick = check;
 $('revealBtn').onclick = () => { if (phase === 'drill') revealAnswer() };
-$('playBtn').onclick = () => { const it = queue[pos]; if (it) phase === 'review' && $('answer').hidden ? playStudy(it) : speak(it, {times:1}); if (!$('answer').hidden) $('answer').focus() };
-$('slowBtn').onclick = () => { const it = queue[pos]; if (it) speak(it, {rateMul: 0.6}); if (!$('answer').hidden) $('answer').focus() };
+$('playBtn').onclick = () => { const it = queue[pos]; if (it) phase === 'review' && $('answer').hidden ? playStudy(it) : speak(it, {times:1}); focusAnswer() };
+$('slowBtn').onclick = () => { const it = queue[pos]; if (it) speak(it, {rateMul: 0.6}); focusAnswer() };
+$('quitX').onclick = () => $('quitBtn').click();
 document.addEventListener('keydown', e => {
   if ($('drill').hidden) return;
-  if (e.key === 'Enter') { e.preventDefault(); check() }
-  else if (e.key === 'Escape') { e.preventDefault(); const it = queue[pos]; if (it) speak(it, {rateMul: e.shiftKey ? 0.6 : 1}) }
+  if (e.key === 'Enter') { e.preventDefault(); check(); return }
+  if (e.key === 'Escape') { e.preventDefault(); const it = queue[pos]; if (it) speak(it, {rateMul: e.shiftKey ? 0.6 : 1}); return }
+  // a hardware keyboard on a tablet still types while the built-in keyboard is shown
+  if (useOSK() && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (e.key === 'Backspace') { e.preventDefault(); typeKey('⌫') }
+    else if (e.key.length === 1) { e.preventDefault(); typeKey(e.key === ' ' ? '␣' : e.key) }
+  }
 });
 })();
 </script>
