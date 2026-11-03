@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dictation Drill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one centred working column — a "listening desk" card that swaps between Setup, Drill, Results and Review. Ink-blue on ruled paper, marker-yellow for mistakes. */
+:root{
+  --paper:#f3f5f8; --sheet:#ffffff; --rule:#dde3ec; --ink:#16233d; --muted:#5d6a82;
+  --cobalt:#2747d6; --cobalt-soft:#e6ebff; --marker:#ffe266; --marker-ink:#5a4500;
+  --good:#1a8a52; --good-soft:#e2f5ea; --bad:#c8323b; --bad-soft:#fde8e9;
+  --shadow:0 1px 2px rgba(22,35,61,.06),0 8px 28px rgba(22,35,61,.07);
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0e1422; --sheet:#151d30; --rule:#26314a; --ink:#e7ecf7; --muted:#9aa6c0;
+  --cobalt:#8aa2ff; --cobalt-soft:#1f2b52; --marker:#e6c53a; --marker-ink:#1b1400;
+  --good:#4fd18b; --good-soft:#12301f; --bad:#ff6f78; --bad-soft:#3a171b;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0e1422; --sheet:#151d30; --rule:#26314a; --ink:#e7ecf7; --muted:#9aa6c0;
+  --cobalt:#8aa2ff; --cobalt-soft:#1f2b52; --marker:#e6c53a; --marker-ink:#1b1400;
+  --good:#4fd18b; --good-soft:#12301f; --bad:#ff6f78; --bad-soft:#3a171b;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35); color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{color-scheme:light}
+body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px;
+  background-image:repeating-linear-gradient(to bottom,transparent 0 31px,var(--rule) 31px 32px);background-attachment:fixed}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand h1{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,6vw,44px);line-height:1;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.brand h1 .dot{color:var(--cobalt)}
+.brand p{margin:6px 0 0;color:var(--muted);max-width:52ch}
+.sheet{background:var(--sheet);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--shadow);padding:24px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h2{font-family:var(--f-display);font-weight:700;font-size:22px;margin:0;line-height:1.2}
+label{font-weight:700;font-size:14px}
+textarea{width:100%;min-height:150px;resize:vertical;font:15px/1.6 var(--f-mono);color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:12px 14px}
+textarea:focus,input:focus,select:focus{outline:2px solid var(--cobalt);outline-offset:1px}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 13px var(--f-body);border:1px solid var(--rule);background:var(--sheet);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.chip:hover{border-color:var(--cobalt);color:var(--cobalt)}
+.chip[aria-pressed="true"]{background:var(--cobalt-soft);border-color:var(--cobalt);color:var(--cobalt)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px 18px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+select,input[type=range]{width:100%}
+select{font:15px var(--f-body);color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:8px 10px}
+.seg{display:flex;border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.seg button{flex:1;border:0;background:transparent;color:var(--ink);font:600 14px var(--f-body);padding:9px 8px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--cobalt);color:var(--sheet)}
+.toggles{display:flex;flex-wrap:wrap;gap:10px 20px}
+.toggles label{font-weight:400;display:flex;gap:8px;align-items:center;cursor:pointer}
+input[type=checkbox]{accent-color:var(--cobalt);width:17px;height:17px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+.btn{font:700 15px var(--f-body);border-radius:10px;padding:11px 18px;cursor:pointer;border:1px solid transparent;display:inline-flex;align-items:center;gap:8px;line-height:1}
+.btn-primary{background:var(--cobalt);color:var(--sheet)}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+.btn-ghost:hover{border-color:var(--cobalt);color:var(--cobalt)}
+.btn:focus-visible,.chip:focus-visible,.seg button:focus-visible,.speak:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.meta{font-size:13.5px;color:var(--muted)}
+kbd{font:600 11.5px var(--f-mono);border:1px solid var(--rule);border-bottom-width:2px;border-radius:5px;padding:1px 5px;background:var(--paper);color:var(--ink)}
+
+/* Drill */
+.progress{height:6px;background:var(--rule);border-radius:99px;overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--cobalt);transition:width .35s ease}
+.drillhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.count{font:600 14px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.stage{display:flex;flex-direction:column;align-items:center;gap:18px;padding:10px 0}
+.speakers{display:flex;gap:14px;align-items:center}
+.speak{width:96px;height:96px;border-radius:50%;border:0;background:var(--cobalt);color:var(--sheet);cursor:pointer;display:grid;place-items:center;position:relative;transition:transform .15s}
+.speak:hover{transform:scale(1.04)}
+.speak.small{width:56px;height:56px;background:var(--cobalt-soft);color:var(--cobalt)}
+.speak svg{width:42%;height:42%}
+.speak.talking::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid var(--cobalt);animation:ring 1s ease-out infinite}
+@keyframes ring{from{opacity:.8;transform:scale(.9)}to{opacity:0;transform:scale(1.25)}}
+.answer{width:100%;font:600 clamp(20px,4.5vw,28px)/1.3 var(--f-mono);text-align:center;color:var(--ink);background:var(--paper);border:2px solid var(--rule);border-radius:12px;padding:14px 16px;transition:border-color .2s,background .2s}
+.answer.ok{border-color:var(--good);background:var(--good-soft)}
+.answer.no{border-color:var(--bad);background:var(--bad-soft);animation:shake .35s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.feedback{min-height:28px;text-align:center;font-weight:700;display:flex;flex-direction:column;gap:6px;align-items:center}
+.feedback.good{color:var(--good)} .feedback.bad{color:var(--bad)} .feedback.info{color:var(--muted);font-weight:400}
+.hint{font:600 20px var(--f-mono);letter-spacing:.18em;color:var(--ink);word-break:break-word;text-align:center}
+.reveal{font:700 clamp(20px,4.5vw,26px) var(--f-mono);background:var(--marker);color:var(--marker-ink);padding:2px 10px;border-radius:6px;word-break:break-word}
+.tries{display:flex;gap:6px;justify-content:center}
+.tries i{width:10px;height:10px;border-radius:50%;background:var(--rule)}
+.tries i.x{background:var(--bad)}
+
+/* Results */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat{border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:2px}
+.stat b{font:800 30px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+.mistakes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-top:1px solid var(--rule)}
+.mistakes li{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 2px;border-bottom:1px solid var(--rule)}
+.mistakes .w{font:600 16px var(--f-mono);word-break:break-word}
+.mistakes .you{font:15px var(--f-mono);color:var(--muted);word-break:break-word}
+.mistakes .n{font:600 12px var(--f-mono);color:var(--bad);background:var(--bad-soft);border-radius:99px;padding:2px 8px;white-space:nowrap}
+.diff ins{text-decoration:none;background:var(--marker);color:var(--marker-ink);border-radius:3px;padding:0 1px}
+.diff del{color:var(--bad);text-decoration:line-through}
+.colhead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:12px;font:600 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:0 2px}
+.perfect{text-align:center;padding:18px;border:1px dashed var(--good);border-radius:12px;color:var(--good);font-weight:700}
+
+/* Review study card */
+.study{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0}
+.letters{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.letters span{font:700 clamp(20px,5vw,30px) var(--f-mono);min-width:1.4em;text-align:center;padding:6px 4px;border-radius:8px;background:var(--cobalt-soft);color:var(--cobalt);transition:background .15s,transform .15s}
+.letters span.sp{background:transparent;min-width:.6em}
+.letters span.lit{background:var(--marker);color:var(--marker-ink);transform:translateY(-3px)}
+.letters span.trap{box-shadow:inset 0 -3px 0 var(--bad)}
+.trouble{display:flex;flex-wrap:wrap;gap:6px}
+.trouble span{font:13px var(--f-mono);background:var(--bad-soft);color:var(--bad);border-radius:6px;padding:2px 8px}
+.note{font-size:13.5px;color:var(--muted);background:var(--paper);border-radius:10px;padding:10px 12px;border:1px solid var(--rule)}
+footer{text-align:center;color:var(--muted);font-size:13px}
+@media (max-width:520px){.sheet{padding:18px}.stats{grid-template-columns:1fr 1fr 1fr}.stat b{font-size:24px}
+  .mistakes li,.colhead{grid-template-columns:minmax(0,1fr) auto}.mistakes .you,.colhead .c2{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Dictation Drill<span class="dot">.</span></h1>
+      <p>Listen, type what you hear, and move on only when the spelling is right. Every word you miss comes back at the end for a second lesson.</p>
+    </div>
+  </header>
+
+  <!-- SETUP -->
+  <section class="sheet" id="setup">
+    <div><div class="eyebrow">Step 1 · Material</div><h2>What should I read to you?</h2></div>
+    <div class="presets" id="presets"></div>
+    <div class="field">
+      <label for="src">Words or text <span class="meta">(paste anything: a word list, one per line, or a paragraph)</span></label>
+      <textarea id="src" spellcheck="false"></textarea>
+      <div class="meta" id="srcInfo"></div>
+    </div>
+
+    <div><div class="eyebrow">Step 2 · How it's read</div></div>
+    <div class="grid">
+      <div class="field">
+        <label>Dictate as</label>
+        <div class="seg" id="unitSeg">
+          <button type="button" data-unit="word" aria-pressed="true">Single words</button>
+          <button type="button" data-unit="sentence" aria-pressed="false">Sentences</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="voice">Voice</label>
+        <select id="voice"></select>
+      </div>
+      <div class="field">
+        <label for="rate">Speed · <span id="rateVal">0.9×</span></label>
+        <input type="range" id="rate" min="0.5" max="1.4" step="0.05" value="0.9">
+      </div>
+      <div class="field">
+        <label for="repeat">Say each item</label>
+        <select id="repeat"><option value="1">Once</option><option value="2" selected>Twice</option><option value="3">Three times</option></select>
+      </div>
+    </div>
+    <div class="toggles">
+      <label><input type="checkbox" id="optShuffle" checked> Shuffle order</label>
+      <label><input type="checkbox" id="optCase" checked> Ignore capital letters</label>
+      <label><input type="checkbox" id="optPunct" checked> Ignore punctuation</label>
+      <label><input type="checkbox" id="optDedupe" checked> Skip repeated words</label>
+    </div>
+    <div class="row">
+      <button class="btn btn-primary" id="startBtn" type="button">▶ Start dictation</button>
+      <button class="btn btn-ghost" id="troubleBtn" type="button" hidden>Practise my trouble words</button>
+      <span class="spacer"></span>
+      <span class="meta" id="voiceWarn"></span>
+    </div>
+  </section>
+
+  <!-- DRILL -->
+  <section class="sheet" id="drill" hidden>
+    <div class="drillhead">
+      <div><div class="eyebrow" id="drillMode">Dictation</div><h2 id="drillTitle">Type what you hear</h2></div>
+      <span class="count" id="count">1 / 20</span>
+    </div>
+    <div class="progress"><i id="bar"></i></div>
+    <div class="stage">
+      <div class="speakers">
+        <button class="speak" id="playBtn" type="button" aria-label="Play again">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
+        </button>
+        <button class="speak small" id="slowBtn" type="button" aria-label="Play slowly" title="Play slowly">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </button>
+      </div>
+      <div id="studyBox" class="study" hidden></div>
+      <input class="answer" id="answer" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Type here, then press Enter">
+      <div class="tries" id="tries"></div>
+      <div class="feedback info" id="feedback"></div>
+    </div>
+    <div class="row">
+      <button class="btn btn-ghost" id="revealBtn" type="button">Show answer</button>
+      <button class="btn btn-ghost" id="quitBtn" type="button">End session</button>
+      <span class="spacer"></span>
+      <button class="btn btn-primary" id="checkBtn" type="button">Check ↵</button>
+    </div>
+    <div class="meta"><kbd>Enter</kbd> check · <kbd>Esc</kbd> play again · <kbd>Shift</kbd>+<kbd>Esc</kbd> play slowly</div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="sheet" id="results" hidden>
+    <div><div class="eyebrow" id="resEyebrow">Session complete</div><h2 id="resTitle">Here's how it went</h2></div>
+    <div class="stats">
+      <div class="stat"><b id="sTotal">0</b><span>items dictated</span></div>
+      <div class="stat"><b id="sFirst">0%</b><span>right first time</span></div>
+      <div class="stat"><b id="sWrong">0</b><span>to review</span></div>
+    </div>
+    <div id="mistakeWrap"></div>
+    <div class="row">
+      <button class="btn btn-primary" id="reviewBtn" type="button">Teach me these words</button>
+      <button class="btn btn-ghost" id="againBtn" type="button">New session</button>
+    </div>
+  </section>
+
+  <footer>Uses your browser's built-in voices. Chrome and Edge have the most natural English voices.</footer>
+</div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem('dd:'+k); return v ? JSON.parse(v) : d }catch(e){ return d } },
+  set(k, v){ try{ localStorage.setItem('dd:'+k, JSON.stringify(v)) }catch(e){} }
+};
+
+/* ---------- Preset material ---------- */
+const PRESETS = {
+  "Commonly misspelled": "accommodate\nachieve\nacquire\napparent\nargument\nbeginning\nbelieve\nbusiness\ncalendar\ncommittee\nconscience\nconscious\ndefinitely\nembarrass\nenvironment\nexaggerate\nforeign\ngovernment\nguarantee\nharass\nimmediately\nindependent\nknowledge\nlibrary\nmaintenance\nnecessary\nneighbour\noccasion\noccurrence\nparliament\npossession\nprivilege\npronunciation\nrecommend\nreceive\nrhythm\nseparate\nsuccessful\ntomorrow\nuntil",
+  "IELTS Listening": "accommodation\napplication\nappointment\naudience\nbeverage\nbrochure\ncampus\ncertificate\ncommunity\ncompetition\nconference\ndeposit\ndepartment\ndisabled\nenrolment\nequipment\nfacilities\nfortnight\nheadquarters\ninsurance\ninterview\nlaboratory\nlecture\nmaintenance\nmembership\nmuseum\nnationality\nparticipant\npassport\nqualification\nquestionnaire\nreceptionist\nreference\nreservation\nsecondary\nsemester\nsignature\nsupervisor\ntemperature\nvolunteer\nWednesday\nFebruary",
+  "Mining & processing": "aggregate\nbeneficiation\ncathode\nconcentrate\nconveyor\ncrusher\ncyclone\ndewatering\nelectrolyte\nelectrowinning\nflotation\ngangue\ngeotechnical\ngrinding\nhaulage\nhydrometallurgy\nleaching\nlimestone\nmetallurgical\nore\noverburden\nraffinate\nreagent\nrecovery\nscreening\nsolvent extraction\nstockpile\nsulphide\ntailings\nthickener\nventilation",
+  "Short passage": "The heap leaching process begins when crushed ore is stacked on a lined pad. A dilute acid solution is then applied to the surface of the heap. As the solution moves through the ore, it dissolves the copper minerals. The pregnant solution is collected at the base and pumped to the extraction plant. Careful control of the flow rate improves the overall recovery."
+};
+
+/* ---------- Setup UI ---------- */
+const src = $('src'), presetsEl = $('presets');
+let unit = store.get('unit','word');
+Object.keys(PRESETS).forEach(name => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'chip'; b.textContent = name; b.setAttribute('aria-pressed','false');
+  b.onclick = () => {
+    src.value = PRESETS[name];
+    if (name === 'Short passage') setUnit('sentence'); else setUnit('word');
+    markPreset(name); updateInfo();
+  };
+  presetsEl.appendChild(b);
+});
+function markPreset(name){ [...presetsEl.children].forEach(c => c.setAttribute('aria-pressed', String(c.textContent === name))) }
+src.value = store.get('src', PRESETS["Commonly misspelled"]);
+if (src.value === PRESETS["Commonly misspelled"]) markPreset("Commonly misspelled");
+src.addEventListener('input', () => { markPreset(null); updateInfo() });
+
+function setUnit(u){ unit = u; [...$('unitSeg').children].forEach(b => b.setAttribute('aria-pressed', String(b.dataset.unit === u))); updateInfo() }
+[...$('unitSeg').children].forEach(b => b.onclick = () => setUnit(b.dataset.unit));
+setUnit(unit);
+
+const opts = ['optShuffle','optCase','optPunct','optDedupe'];
+opts.forEach(id => { const saved = store.get(id, null); if (saved !== null) $(id).checked = saved; $(id).onchange = () => { store.set(id, $(id).checked); updateInfo() } });
+const rate = $('rate'); rate.value = store.get('rate', 0.9);
+const showRate = () => $('rateVal').textContent = Number(rate.value).toFixed(2).replace(/0$/,'') + '×';
+rate.oninput = () => { showRate(); store.set('rate', rate.value) }; showRate();
+$('repeat').value = store.get('repeat','2'); $('repeat').onchange = () => store.set('repeat', $('repeat').value);
+
+function parseItems(text){
+  text = text.trim(); if (!text) return [];
+  let items;
+  if (unit === 'sentence') {
+    items = text.split(/\n+|(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
+  } else {
+    // keep multi-word lines (e.g. "solvent extraction") when the input is a list
+    const lines = text.split(/\n+/).map(s => s.trim()).filter(Boolean);
+    const looksLikeList = lines.length > 1 && lines.every(l => l.split(/\s+/).length <= 3);
+    items = looksLikeList ? lines : text.split(/\s+/);
+    items = items.map(w => w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '')).filter(Boolean);
+  }
+  if ($('optDedupe').checked) { const seen = new Set(); items = items.filter(w => { const k = w.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true }) }
+  return items;
+}
+function updateInfo(){
+  const n = parseItems(src.value).length;
+  $('srcInfo').textContent = n ? `${n} ${unit === 'word' ? (n===1?'word':'words') : (n===1?'sentence':'sentences')} ready` : 'Add some words to begin.';
+  $('startBtn').disabled = !n;
+  store.set('src', src.value); store.set('unit', unit);
+}
+updateInfo();
+
+/* ---------- Speech ---------- */
+const synth = window.speechSynthesis;
+let voices = [];
+function loadVoices(){
+  if (!synth) { $('voiceWarn').textContent = 'This browser cannot speak. Try Chrome or Edge.'; return }
+  voices = synth.getVoices().filter(v => /^en/i.test(v.lang));
+  if (!voices.length) voices = synth.getVoices();
+  const sel = $('voice'), saved = store.get('voice', '');
+  sel.innerHTML = '';
+  const rank = v => (/natural|neural|online/i.test(v.name)?0:1) + (/en-GB/i.test(v.lang)?0:0.5);
+  voices.sort((a,b) => rank(a)-rank(b) || a.name.localeCompare(b.name));
+  voices.forEach((v,i) => { const o = document.createElement('option'); o.value = v.name; o.textContent = `${v.name.replace(/^Microsoft |^Google /,'')} (${v.lang})`; sel.appendChild(o) });
+  if (saved && voices.some(v => v.name === saved)) sel.value = saved;
+  $('voiceWarn').textContent = voices.length ? '' : 'No voices found yet. They may load after a moment.';
+}
+if (synth) { loadVoices(); synth.onvoiceschanged = loadVoices }
+$('voice').onchange = () => store.set('voice', $('voice').value);
+
+let speakToken = 0;
+function speak(text, {rateMul = 1, times = 1, letters = false, onLetter = null} = {}){
+  if (!synth) return Promise.resolve();
+  synth.cancel();
+  const token = ++speakToken;
+  const voice = voices.find(v => v.name === $('voice').value);
+  const btn = $('playBtn'); btn.classList.add('talking');
+  const parts = [];
+  if (letters) {
+    [...text].forEach((ch, i) => parts.push({t: ch === ' ' ? 'space' : ch.toLowerCase(), i, gap: true}));
+  } else {
+    for (let k = 0; k < times; k++) parts.push({t: text});
+  }
+  return new Promise(resolve => {
+    let idx = 0;
+    const next = () => {
+      if (token !== speakToken) return resolve();
+      if (idx >= parts.length) { btn.classList.remove('talking'); onLetter && onLetter(-1); return resolve() }
+      const p = parts[idx++];
+      const u = new SpeechSynthesisUtterance(p.t);
+      if (voice) { u.voice = voice; u.lang = voice.lang } else u.lang = 'en-GB';
+      u.rate = Math.max(0.3, Number(rate.value) * rateMul * (letters ? 0.9 : 1));
+      u.onstart = () => onLetter && p.i !== undefined && onLetter(p.i);
+      u.onend = () => setTimeout(next, letters ? 90 : (idx < parts.length ? 650 : 0));
+      u.onerror = () => { btn.classList.remove('talking'); resolve() };
+      synth.speak(u);
+    };
+    next();
+  });
+}
+
+/* ---------- Comparison ---------- */
+const norm = s => {
+  s = s.normalize('NFKC').replace(/[’‘]/g, "'").replace(/\s+/g, ' ').trim();
+  if ($('optPunct').checked) s = s.replace(/[^\p{L}\p{N}\s'-]/gu, '').replace(/\s+/g,' ').trim();
+  if ($('optCase').checked) s = s.toLowerCase();
+  return s;
+};
+// Character diff (LCS) for teaching: which letters were missing / extra
+function diff(attempt, target){
+  const a = [...attempt.toLowerCase()], b = [...target.toLowerCase()], A = [...attempt], B = [...target];
+  const m = a.length, n = b.length, L = Array.from({length:m+1}, () => new Array(n+1).fill(0));
+  for (let i = m-1; i >= 0; i--) for (let j = n-1; j >= 0; j--) L[i][j] = a[i] === b[j] ? L[i+1][j+1] + 1 : Math.max(L[i+1][j], L[i][j+1]);
+  const out = []; let i = 0, j = 0;
+  while (i < m && j < n) {
+    if (a[i] === b[j]) { out.push({c:B[j], k:'same', j}); i++; j++ }
+    else if (L[i+1][j] >= L[i][j+1]) { out.push({c:A[i], k:'del'}); i++ }
+    else { out.push({c:B[j], k:'ins', j}); j++ }
+  }
+  while (i < m) out.push({c:A[i++], k:'del'});
+  while (j < n) { out.push({c:B[j], k:'ins', j}); j++ }
+  return out;
+}
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function diffHTML(attempt, target){
+  return diff(attempt, target).map(d => d.k === 'same' ? esc(d.c) : d.k === 'ins' ? `<ins>${esc(d.c)}</ins>` : `<del>${esc(d.c)}</del>`).join('');
+}
+
+/* ---------- Session state ---------- */
+let queue = [], pos = 0, phase = 'drill', round = 0;
+let tries = 0, revealed = false, locked = false;
+let log = new Map();   // item -> {attempts:[], wrong:boolean, firstTry:boolean}
+let sessionItems = [];
+
+function show(id){ ['setup','drill','results'].forEach(s => $(s).hidden = s !== id); window.scrollTo({top:0, behavior:'smooth'}) }
+const shuffle = arr => { arr = arr.slice(); for (let i = arr.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [arr[i],arr[j]] = [arr[j],arr[i]] } return arr };
+
+function startSession(items){
+  if (synth) synth.cancel();
+  sessionItems = items; log = new Map(); round = 0; phase = 'drill';
+  queue = $('optShuffle').checked ? shuffle(items) : items.slice();
+  items.forEach(w => log.set(w, {attempts:[], wrong:false, firstTry:true}));
+  pos = 0; show('drill'); loadItem();
+}
+$('startBtn').onclick = () => startSession(parseItems(src.value));
+
+function loadItem(){
+  tries = 0; revealed = false; locked = false;
+  const item = queue[pos];
+  const total = queue.length;
+  $('count').textContent = `${pos+1} / ${total}`;
+  $('bar').style.width = `${(pos/total)*100}%`;
+  $('drillMode').textContent = phase === 'drill' ? 'Dictation' : `Review · round ${round}`;
+  $('drillTitle').textContent = phase === 'drill' ? 'Type what you hear' : 'Learn it, then type it';
+  const a = $('answer'); a.value = ''; a.className = 'answer'; a.disabled = false;
+  a.placeholder = unit === 'sentence' && item.includes(' ') ? 'Type the whole sentence, then press Enter' : 'Type here, then press Enter';
+  renderTries(); setFeedback('', 'info');
+  $('revealBtn').hidden = phase !== 'drill';
+  const study = $('studyBox');
+  if (phase === 'review') {
+    study.hidden = false; renderStudy(item, false);
+    a.hidden = true; $('checkBtn').textContent = 'I’m ready to type';
+    setFeedback('Listen to the word and watch how it is spelled.', 'info');
+    playStudy(item);
+  } else {
+    study.hidden = true; a.hidden = false; $('checkBtn').textContent = 'Check ↵';
+    a.focus();
+    setTimeout(() => speak(item, {times: Number($('repeat').value)}), 250);
+  }
+}
+
+function renderTries(){
+  const max = 3, el = $('tries'); el.innerHTML = '';
+  if (phase !== 'drill') return;
+  for (let i = 0; i < max; i++) { const d = document.createElement('i'); if (i < tries) d.className = 'x'; el.appendChild(d) }
+}
+function setFeedback(html, kind){ const f = $('feedback'); f.className = 'feedback ' + kind; f.innerHTML = html }
+
+function hintFor(item, level){
+  // level 1: shape (length + first letter) ; level 2: more letters
+  return [...item].map((ch, i) => {
+    if (/\s/.test(ch)) return ' ';
+    if (!/\p{L}|\p{N}/u.test(ch)) return ch;
+    if (i === 0) return ch;
+    if (level >= 2 && (i % 2 === 0 || i === item.length-1)) return ch;
+    return '_';
+  }).join(' ');
+}
+
+/* --- review/study card --- */
+function trapIndexes(item){
+  // letters the learner got wrong in any attempt (from diff insertions)
+  const rec = log.get(item); const s = new Set();
+  (rec ? rec.attempts : []).forEach(at => diff(at, item).forEach(d => { if (d.k === 'ins' && d.j !== undefined) s.add(d.j) }));
+  return s;
+}
+function renderStudy(item, hide){
+  const traps = trapIndexes(item); const rec = log.get(item);
+  const lastWrong = rec && rec.attempts.length ? rec.attempts[rec.attempts.length-1] : '';
+  const letters = [...item].map((ch, i) => `<span class="${ch === ' ' ? 'sp' : ''} ${traps.has(i) ? 'trap' : ''}" data-i="${i}">${hide && ch !== ' ' ? '•' : esc(ch)}</span>`).join('');
+  $('studyBox').innerHTML = `<div class="letters" id="letters">${letters}</div>` +
+    (lastWrong && !hide ? `<div class="meta">You typed: <span class="diff" style="font-family:var(--f-mono)">${diffHTML(lastWrong, item)}</span></div>` : '') +
+    (!hide ? `<div class="meta">Underlined letters are the ones you missed.</div>` : '');
+}
+async function playStudy(item){
+  locked = true;
+  await speak(item, {times: 1});
+  if (!item.includes(' ') || item.length <= 24) {
+    await new Promise(r => setTimeout(r, 350));
+    await speak(item, {letters: true, onLetter: i => {
+      document.querySelectorAll('#letters span').forEach(s => s.classList.toggle('lit', Number(s.dataset.i) === i));
+    }});
+  }
+  await new Promise(r => setTimeout(r, 300));
+  await speak(item, {times: 1});
+  locked = false;
+}
+function beginRecall(){
+  const item = queue[pos];
+  if (synth) synth.cancel(); speakToken++;
+  renderStudy(item, true);
+  const a = $('answer'); a.hidden = false; a.value = ''; a.className = 'answer'; a.focus();
+  $('checkBtn').textContent = 'Check ↵';
+  setFeedback('Now type it from memory.', 'info');
+  speak(item, {times: 1});
+}
+
+/* --- checking --- */
+function check(){
+  if (phase === 'review' && $('answer').hidden) { beginRecall(); return }
+  const a = $('answer'), item = queue[pos], typed = a.value;
+  if (!typed.trim() || a.disabled) return;
+  const rec = log.get(item);
+  if (norm(typed) === norm(item)) {
+    a.className = 'answer ok'; a.disabled = true;
+    setFeedback(revealed ? 'Correct. This one goes on your review list.' : (tries === 0 ? 'Correct!' : 'Correct this time.'), 'good');
+    if (phase === 'review') { rec.reviewOk = true }
+    setTimeout(advance, revealed || tries ? 900 : 550);
+    return;
+  }
+  // wrong
+  rec.attempts.push(typed.trim()); rec.wrong = true; rec.firstTry = false;
+  tries++; renderTries();
+  a.className = 'answer'; void a.offsetWidth; a.className = 'answer no';
+  if (phase === 'review') {
+    rec.reviewOk = false;
+    setFeedback(`Not yet. It's spelled <span class="reveal">${esc(item)}</span><br><span class="diff" style="font-family:var(--f-mono);font-weight:400">${diffHTML(typed.trim(), item)}</span>`, 'bad');
+    renderStudy(item, false);
+    speak(item, {letters: true, onLetter: i => document.querySelectorAll('#letters span').forEach(s => s.classList.toggle('lit', Number(s.dataset.i) === i))});
+    a.select();
+    return;
+  }
+  if (tries === 1) { setFeedback('Not quite. Listen again and fix it.', 'bad'); speak(item, {times:1}) }
+  else if (tries === 2) { setFeedback(`Hint: <span class="hint">${esc(hintFor(item,1))}</span>`, 'bad'); speak(item, {rateMul: 0.7}) }
+  else if (tries === 3) { setFeedback(`Closer hint: <span class="hint">${esc(hintFor(item,2))}</span>`, 'bad'); speak(item, {rateMul: 0.7}) }
+  else revealAnswer();
+  a.select();
+}
+function revealAnswer(){
+  const item = queue[pos], rec = log.get(item), typed = $('answer').value.trim();
+  if (!revealed && typed && !rec.attempts.includes(typed) && norm(typed) !== norm(item)) rec.attempts.push(typed);
+  revealed = true; rec.wrong = true; rec.firstTry = false;
+  setFeedback(`The answer is <span class="reveal">${esc(item)}</span><span style="font-weight:400">Type it correctly to continue.</span>`, 'bad');
+  speak(item, {times:1});
+  $('answer').value = ''; $('answer').focus();
+}
+function advance(){
+  pos++;
+  if (pos < queue.length) { loadItem(); return }
+  $('bar').style.width = '100%';
+  finishRound();
+}
+function finishRound(){
+  if (phase === 'drill') {
+    const wrong = sessionItems.filter(w => log.get(w).wrong);
+    saveTrouble(wrong, sessionItems.filter(w => !log.get(w).wrong));
+    renderResults(wrong);
+  } else {
+    const still = queue.filter(w => !log.get(w).reviewOk);
+    if (still.length) { round++; queue = shuffle(still); pos = 0; setTimeout(loadItem, 300); setFeedback('', 'info'); toast(`${still.length} still tricky. One more round.`) ; return }
+    renderResults([], true);
+  }
+}
+function toast(msg){ setFeedback(msg, 'info') }
+
+function renderResults(wrong, reviewDone){
+  show('results');
+  const total = sessionItems.length, firstOk = sessionItems.filter(w => log.get(w).firstTry).length;
+  $('sTotal').textContent = total;
+  $('sFirst').textContent = total ? Math.round(firstOk/total*100) + '%' : '0%';
+  $('sWrong').textContent = reviewDone ? 0 : wrong.length;
+  const wrap = $('mistakeWrap');
+  if (reviewDone) {
+    $('resEyebrow').textContent = 'Review complete'; $('resTitle').textContent = 'Every word is spelled right now';
+    const learned = sessionItems.filter(w => log.get(w).wrong);
+    wrap.innerHTML = `<div class="perfect">You fixed ${learned.length} ${learned.length===1?'word':'words'}. Run the session again tomorrow to make it stick.</div>` +
+      (learned.length ? `<div class="trouble">${learned.map(w => `<span>${esc(w)}</span>`).join('')}</div>` : '');
+    $('reviewBtn').hidden = true;
+  } else if (!wrong.length) {
+    $('resEyebrow').textContent = 'Session complete'; $('resTitle').textContent = 'A clean sheet';
+    wrap.innerHTML = `<div class="perfect">No mistakes. Try a faster speed or a harder list next time.</div>`;
+    $('reviewBtn').hidden = true;
+  } else {
+    $('resEyebrow').textContent = 'Session complete'; $('resTitle').textContent = `${wrong.length} ${wrong.length===1?'word needs':'words need'} another look`;
+    wrap.innerHTML = `<div class="colhead"><span>Correct spelling</span><span class="c2">What you typed</span><span>Misses</span></div>
+      <ul class="mistakes">${wrong.map(w => { const r = log.get(w), last = r.attempts[r.attempts.length-1] || '';
+        return `<li><span class="w">${esc(w)}</span><span class="you diff">${last ? diffHTML(last, w) : '<em>revealed</em>'}</span><span class="n">${r.attempts.length || 1}×</span></li>` }).join('')}</ul>
+      <div class="note">Highlighted letters are ones you left out; crossed-out letters are extras. Review plays each word, spells it letter by letter, then asks you to type it from memory. Words you miss again come back in another round.</div>`;
+    $('reviewBtn').hidden = false;
+  }
+  updateTroubleBtn();
+}
+$('reviewBtn').onclick = () => {
+  const wrong = sessionItems.filter(w => log.get(w).wrong);
+  phase = 'review'; round = 1; queue = shuffle(wrong); pos = 0;
+  wrong.forEach(w => log.get(w).reviewOk = false);
+  show('drill'); loadItem();
+};
+$('againBtn').onclick = () => { if (synth) synth.cancel(); show('setup') };
+$('quitBtn').onclick = () => {
+  if (synth) synth.cancel(); speakToken++;
+  if (phase === 'drill') {
+    sessionItems = queue.slice(0, pos);
+    if (!sessionItems.length) { show('setup'); return }
+    const wrong = sessionItems.filter(w => log.get(w).wrong);
+    saveTrouble(wrong, sessionItems.filter(w => !log.get(w).wrong));
+    renderResults(wrong);
+  } else renderResults([], true);
+};
+
+/* --- trouble words kept between visits --- */
+function saveTrouble(wrong, right){
+  const t = store.get('trouble', {});
+  wrong.forEach(w => t[w] = (t[w] || 0) + 1);
+  right.forEach(w => { if (t[w]) { t[w]--; if (t[w] <= 0) delete t[w] } });
+  store.set('trouble', t);
+}
+function updateTroubleBtn(){
+  const t = Object.keys(store.get('trouble', {}));
+  const b = $('troubleBtn'); b.hidden = !t.length; b.textContent = `Practise my trouble words (${t.length})`;
+}
+$('troubleBtn').onclick = () => { const t = Object.keys(store.get('trouble', {})); if (t.length) startSession(t) };
+updateTroubleBtn();
+
+/* --- controls --- */
+$('checkBtn').onclick = check;
+$('revealBtn').onclick = () => { if (phase === 'drill') revealAnswer() };
+$('playBtn').onclick = () => { const it = queue[pos]; if (it) phase === 'review' && $('answer').hidden ? playStudy(it) : speak(it, {times:1}); if (!$('answer').hidden) $('answer').focus() };
+$('slowBtn').onclick = () => { const it = queue[pos]; if (it) speak(it, {rateMul: 0.6}); if (!$('answer').hidden) $('answer').focus() };
+document.addEventListener('keydown', e => {
+  if ($('drill').hidden) return;
+  if (e.key === 'Enter') { e.preventDefault(); check() }
+  else if (e.key === 'Escape') { e.preventDefault(); const it = queue[pos]; if (it) speak(it, {rateMul: e.shiftKey ? 0.6 : 1}) }
+});
+})();
+</script>
+</body>
+</html>
