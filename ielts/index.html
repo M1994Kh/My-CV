@@ -8,11 +8,11 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2747d6">
-<meta name="description" content="IELTS Studio: dictation and IELTS Speaking practice with an AI examiner powered by Gemini 3.8 Flash.">
+<meta name="description" content="IELTS Studio: dictation, IELTS Speaking practice with an AI examiner powered by Gemini 3.8 Flash, and Persian masterclass lessons for Listening, Reading, Writing and Speaking.">
 <title>IELTS Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Vazirmatn:wght@400;600;800&display=swap">
 <style>
 /* Layout: one centred working column — a "listening desk" card that swaps between Setup, Drill, Results and Review. Ink-blue on ruled paper, marker-yellow for mistakes. */
 :root{
@@ -345,6 +345,61 @@ body.drilling .study{padding:0}
 @media (max-width:520px){.sheet{padding:18px}.stats{grid-template-columns:1fr 1fr 1fr}.stat b{font-size:24px}
   .mistakes li,.colhead{grid-template-columns:minmax(0,1fr) auto}.mistakes .you,.colhead .c2{display:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ---------- Lessons (Persian masterclass notes) ---------- */
+.fa{direction:rtl;text-align:right;font-family:"B Yekan",Vazirmatn,Tahoma,sans-serif;line-height:1.95;font-size:15.5px}
+.fa .en,.fa bdi{font-family:var(--f-body)}
+.lhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.lhead .crumbs{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.lprog{font:600 13px var(--f-mono);color:var(--muted)}
+.lprog b{color:var(--good)}
+.lbar{height:6px;border-radius:99px;background:var(--rule);overflow:hidden}
+.lbar i{display:block;height:100%;background:var(--good);border-radius:99px}
+.llist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.llist a{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 14px;align-items:center;text-decoration:none;color:var(--ink);border:1px solid var(--rule);border-radius:12px;padding:12px 14px;background:var(--sheet);transition:border-color .15s}
+.llist a:hover{border-color:var(--cobalt)}
+.llist a:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
+.llist .num{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--cobalt-soft);color:var(--cobalt);font:800 16px var(--f-display);grid-row:span 2}
+.llist .done .num{background:var(--good-soft);color:var(--good)}
+.llist .lt{font:700 16px/1.6 "B Yekan",Vazirmatn,Tahoma,sans-serif;direction:rtl;text-align:right;min-width:0}
+.llist .ls{font:400 13px/1.7 "B Yekan",Vazirmatn,Tahoma,sans-serif;color:var(--muted);direction:rtl;text-align:right;grid-column:2;min-width:0}
+.llist .ld{font:600 12px var(--f-mono);color:var(--muted);grid-row:span 2;text-align:end;white-space:nowrap}
+.llist .done .ld{color:var(--good)}
+.lesson h2.ftitle{font:800 clamp(21px,4.6vw,27px)/1.55 "B Titr","B Yekan",Vazirmatn,Tahoma,sans-serif;direction:rtl;text-align:right;margin:0}
+.lesson .fsub{margin:0;color:var(--muted);font-size:14px}
+.lbanner{margin:0;border-right:4px solid var(--cobalt);background:var(--cobalt-soft);border-radius:10px;padding:12px 14px;font-weight:600}
+.lpills{display:flex;flex-wrap:wrap;gap:8px}
+.lpills span{border:1px solid var(--rule);border-radius:99px;padding:3px 12px;font-size:13.5px;background:var(--paper)}
+.lcards{columns:2 330px;column-gap:14px}
+.lcard{break-inside:avoid;display:block;border:1px solid var(--rule);border-radius:12px;padding:14px 16px;margin:0 0 14px;background:var(--sheet)}
+.lcard h3{margin:0 0 6px;font:800 16.5px/1.7 "B Yekan",Vazirmatn,Tahoma,sans-serif;display:flex;gap:8px;align-items:flex-start}
+.lcard h3 .cn{flex:none;width:26px;height:26px;margin-top:2px;border-radius:99px;display:inline-flex;align-items:center;justify-content:center;background:var(--cobalt);color:var(--sheet);font:700 13px/1 Vazirmatn,Tahoma,sans-serif}
+.lcard p{margin:0 0 8px}
+.lcard ul,.lcard ol{margin:0 0 8px;padding-right:22px;padding-left:0}
+.lcard ol{list-style:persian}
+.lcard li{margin:3px 0}
+.lcard li::marker{color:var(--cobalt)}
+.lcard>:last-child{margin-bottom:0}
+.lcard.warn{background:var(--bad-soft);border-color:color-mix(in srgb,var(--bad) 35%,transparent)}
+.lcard.warn h3{color:var(--bad)}
+.lcard.do{background:var(--good-soft);border-color:color-mix(in srgb,var(--good) 35%,transparent)}
+.lcard.do h3{color:var(--good)}
+.lex{direction:ltr;text-align:left;font:14px/1.6 var(--f-body);border-left:3px solid var(--cobalt);background:var(--paper);border-radius:6px;padding:7px 10px;margin:0 0 8px;unicode-bidi:plaintext}
+.lex div+div{margin-top:4px;padding-top:4px;border-top:1px dashed var(--rule)}
+.ltbl{overflow-x:auto;margin:0 0 8px;border:1px solid var(--rule);border-radius:8px}
+.ltbl table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.7}
+.ltbl th,.ltbl td{border-bottom:1px solid var(--rule);padding:6px 9px;text-align:right;vertical-align:top;min-width:96px}
+.lcard .ltr{text-align:left;font-family:var(--f-body)}
+.lcard li.ltr{direction:ltr}
+.ltbl th{background:var(--cobalt-soft);color:var(--cobalt);font-weight:700}
+.ltbl tr:last-child td{border-bottom:0}
+.ltbl td+td,.ltbl th+th{border-right:1px solid var(--rule)}
+.lfoot a.btn,.learnlink a.btn{text-decoration:none}
+.lfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.lfoot .btn[aria-pressed="true"]{background:var(--good-soft);color:var(--good);border-color:var(--good)}
+.lsrc{margin:0}
+.learnlink{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border:1px dashed var(--rule);border-radius:12px;padding:12px 14px}
+@media (max-width:520px){.fa{font-size:15px}.lcard{padding:12px 13px}.llist a{gap:4px 10px;padding:11px 12px}}
+@media print{.tabs,header,.lhead,.lfoot{display:none!important}body{background:none}.sheet{box-shadow:none;border:0}}
 </style>
 </head>
 <body>
@@ -363,10 +418,11 @@ body.drilling .study{padding:0}
   <nav class="tabs" id="tabs" aria-label="Modules">
     <a href="#home" class="tab" data-tab="home" aria-current="page">Home</a>
     <a href="#dictation" class="tab" data-tab="dictation">Dictation</a>
+    <a href="#listening" class="tab" data-tab="listening">Listening</a>
+    <a href="#reading" class="tab" data-tab="reading">Reading</a>
+    <a href="#writing" class="tab" data-tab="writing">Writing</a>
     <a href="#speaking" class="tab" data-tab="speaking">Speaking</a>
     <span class="tab soon" title="Coming soon">Grammar</span>
-    <span class="tab soon" title="Coming soon">Writing</span>
-    <span class="tab soon" title="Coming soon">Reading</span>
     <a href="#options" class="tab" data-tab="options" aria-label="Settings">⚙ Settings</a>
   </nav>
 
@@ -383,6 +439,35 @@ body.drilling .study{padding:0}
       <div><div class="eyebrow">Progress</div><h2>Where you are</h2></div>
       <div class="mgrid" id="homeStats"></div>
       <div id="homeBands"></div>
+    </section>
+  </div>
+
+  <!-- LESSONS (Listening / Reading / Writing / Speaking masterclass notes) -->
+  <div id="learnApp" class="appview" hidden>
+    <section class="sheet" id="learnList">
+      <div class="drillhead">
+        <div><div class="eyebrow" id="llEyebrow">Lessons</div><h2 id="llTitle">Masterclass</h2></div>
+        <span class="lprog" id="llProg"></span>
+      </div>
+      <p class="meta" style="margin:0" id="llIntro"></p>
+      <div class="lbar" aria-hidden="true"><i id="llBar" style="width:0"></i></div>
+      <ol class="llist" id="llItems"></ol>
+      <div class="status" id="llStatus" role="status"></div>
+    </section>
+    <section class="sheet lesson" id="learnLesson" hidden>
+      <div class="lhead">
+        <div class="crumbs"><a href="#" class="linkbtn" id="lsBack">← All lessons</a><span class="eyebrow" id="lsEyebrow"></span></div>
+        <span class="lprog" id="lsDur"></span>
+      </div>
+      <div class="fa" lang="fa" dir="rtl" id="lsBody"></div>
+      <div class="lfoot">
+        <button type="button" class="btn btn-ghost" id="lsDone" aria-pressed="false">✓ Mark as read</button>
+        <div class="row" style="gap:8px">
+          <a href="#" class="btn btn-ghost" id="lsPrev">← Previous</a>
+          <a href="#" class="btn btn-primary" id="lsNext">Next lesson →</a>
+        </div>
+      </div>
+      <p class="meta lsrc" id="lsSrc"></p>
     </section>
   </div>
 
@@ -594,6 +679,7 @@ body.drilling .study{padding:0}
   <!-- SPEAKING HOME -->
   <section class="sheet" id="spkHome">
     <div><div class="eyebrow">IELTS Speaking · examiner mode</div><h2>Sit a speaking test</h2></div>
+    <div class="learnlink"><span><b>Speaking lessons</b> <span class="meta" id="spkLearnInfo">· 4 Persian masterclass notes on Parts 1–3 and test-day rescue lines</span></span><a href="#speaking/lessons" class="btn btn-ghost">Open lessons →</a></div>
     <p class="meta" style="margin:0">The examiner asks the questions out loud and records your answers. When you finish, it transcribes and marks the test against the four IELTS criteria and writes you a full report.</p>
     <div class="field">
       <label>Test</label>
@@ -2333,24 +2419,33 @@ renderHistory();
 showSpk('home');
 
 /* ---------- App shell: routing, home dashboard, settings ---------- */
-const VIEWS = { home: 'homeApp', dictation: 'dictApp', speaking: 'spkApp', options: 'optApp' };
+const VIEWS = { home: 'homeApp', dictation: 'dictApp', speaking: 'spkApp', options: 'optApp', listening: 'learnApp', reading: 'learnApp', writing: 'learnApp' };
 const SUBS = {
   home: 'Your IELTS practice desk. Train spelling by ear, sit speaking tests with an AI examiner, and track your bands.',
   dictation: 'Listen, type what you hear, and move on only when the spelling is right. Every word you miss comes back at the end for a second lesson.',
   speaking: 'A speaking examiner that asks real IELTS-style questions, records you, and marks your answers with a full band-score report.',
-  options: 'One AI engine and one set of keys for every module. Everything is stored only in this browser.'
+  options: 'One AI engine and one set of keys for every module. Everything is stored only in this browser.',
+  listening: 'Nine Persian masterclass lessons: the 30-second preview, spelling and numbers, maps, diagrams, and the Part 3 and Part 4 traps.',
+  reading: 'Eight Persian masterclass lessons: skimming, scanning, headings, matching, multiple choice, T/F/NG and the General Training sections.',
+  writing: 'Eight Persian masterclass lessons: Task 1 charts, processes, maps and letters, then Task 2 planning, PEEL paragraphs and the final check.',
+  learnSpeaking: 'Four Persian masterclass lessons on Speaking Parts 1–3, pronunciation and the rescue lines for test day.'
 };
 function route(){
   const h = location.hash.replace('#', '');
-  const t = VIEWS[h] ? h : 'home';
-  Object.entries(VIEWS).forEach(([k, id]) => $(id).hidden = k !== t);
+  const parts = h.split('/');
+  let t = VIEWS[parts[0]] ? parts[0] : 'home';
+  const learnMod = t === 'speaking' ? (parts[1] === 'lessons' ? 'speaking' : null) : (LEARN[t] ? t : null);
+  const viewId = learnMod ? 'learnApp' : VIEWS[t];
+  document.querySelectorAll('.appview').forEach(el => { if (Object.values(VIEWS).includes(el.id)) el.hidden = el.id !== viewId });
   document.querySelectorAll('#tabs .tab[data-tab]').forEach(a => { if (a.dataset.tab === t) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current') });
-  $('brandSub').textContent = SUBS[t];
+  $('brandSub').textContent = learnMod === 'speaking' ? SUBS.learnSpeaking : SUBS[t];
   if (t !== 'speaking' && exam) stopExam(true);
+  if (learnMod && exam) stopExam(true);
   if (t !== 'dictation') { document.body.classList.remove('drilling'); if (synth && !exam) synth.cancel() }
-  if (t === 'speaking') { aiInfo(); engineNote(); renderHistory() }
+  if (t === 'speaking' && !learnMod) { aiInfo(); engineNote(); renderHistory() }
   if (t === 'home') renderHome();
   if (t === 'options') { loadProv(); showSeen(); showBank() }
+  if (learnMod) openLearn(learnMod, learnMod === 'speaking' ? parts[2] : parts[1]);
   const cur = document.querySelector('#tabs .tab[aria-current]'); if (cur && cur.scrollIntoView) try { cur.scrollIntoView({ block: 'nearest', inline: 'nearest' }) } catch (e) {}
 }
 window.addEventListener('hashchange', route);
@@ -2375,7 +2470,13 @@ function renderHome(){
     ['dictation', 'Dictation', 'Hear words or sentences, type them, and re-learn every misspelling.', seen ? `${seen} words practised · ${trouble} trouble words` : 'Start with a ready list or AI words'],
     ['speaking', 'Speaking', 'A full IELTS speaking test with an examiner, recording, transcript and band report.', last ? `Last band ${Number(last.report.overall).toFixed(1)} · ${hist.length} ${hist.length === 1 ? 'test' : 'tests'}` : `${allCards().length} flashcards ready`]
   ];
-  const soon = [['grammar', 'Grammar', 'Targeted drills built from the mistakes in your speaking reports.'], ['writing', 'Writing', 'Task 1 and Task 2 essays marked against the writing band descriptors.'], ['reading', 'Reading', 'Timed passages with True/False/Not Given and matching questions.'], ['listening', 'Listening', 'Section-style recordings with form, map and multiple-choice tasks.']];
+  const lessonStat = m => { const t = LESSON_COUNT[m], n = doneCount(m, t); return n ? `${n} / ${t} lessons read` : `${t} lessons · Persian` };
+  live.splice(1, 0,
+    ['listening', 'Listening', 'Masterclass lessons: the 30-second preview, spelling and numbers, maps, diagrams, Parts 3 and 4.', lessonStat('listening')],
+    ['reading', 'Reading', 'Masterclass lessons: skimming, scanning, headings, matching, MCQ, True/False/Not Given.', lessonStat('reading')],
+    ['writing', 'Writing', 'Masterclass lessons: Task 1 charts, processes, maps and letters; Task 2 planning and PEEL.', lessonStat('writing')]
+  );
+  const soon = [['grammar', 'Grammar', 'Targeted drills built from the mistakes in your speaking reports.']];
   $('mods').innerHTML = live.map(([k, n, d, st]) => `<a class="mod" href="#${k}"><span class="glyph">${GLYPH[k]}</span><h3>${n}</h3><p>${d}</p><span class="mstat">${esc(st)}</span></a>`).join('')
     + soon.map(([k, n, d]) => `<div class="mod off" aria-disabled="true"><span class="glyph">${GLYPH[k]}</span><h3>${n}</h3><p>${d}</p><span class="mstat">Coming soon</span></div>`).join('');
   const bands = hist.filter(h => h.report && h.report.overall != null).slice(0, 10).reverse();
@@ -2384,6 +2485,100 @@ function renderHome(){
   $('homeBands').innerHTML = bands.length >= 2
     ? `<div class="eyebrow" style="margin-top:6px">Speaking band, last ${bands.length} tests</div><div class="bandrow">${bands.map(h => `<div title="${esc(h.label)}"><b>${Number(h.report.overall).toFixed(1)}</b><i style="height:${Math.max(6, h.report.overall / 9 * 72)}px"></i></div>`).join('')}</div>`
     : '<p class="meta" style="margin:0">Your speaking band trend appears here after two tests.</p>';
+}
+
+
+/* ---------- Lessons: Persian masterclass notes (learn/<module>.json) ---------- */
+const LEARN = {
+  listening: { name: 'Listening', base: '#listening', intro: 'Persian notes from a full IELTS masterclass, one per video. Each lesson has the key ideas, worked examples, the traps to avoid and a short practice task.' },
+  reading: { name: 'Reading', base: '#reading', intro: 'Persian notes from a full IELTS masterclass, one per video: passage anatomy, skimming and scanning, every major question type, and the General Training sections.' },
+  writing: { name: 'Writing', base: '#writing', intro: 'Persian notes from a full IELTS masterclass, one per video: Task 1 (charts, processes, maps, letters) and Task 2 (planning, PEEL paragraphs, final check).' },
+  speaking: { name: 'Speaking', base: '#speaking/lessons', intro: 'Persian notes from a full IELTS masterclass: Part 1, the Part 2 cue card, the Part 3 discussion, and a test-day first-aid kit. Practise what you learn in the speaking test.' }
+};
+const learnCache = {};
+const FA_D = '۰۱۲۳۴۵۶۷۸۹';
+const faNum = n => String(n).replace(/\d/g, d => FA_D[d]);
+function learnDone(){ return store.get('learnDone', {}) }
+function doneCount(mod, total){ const d = learnDone(); let n = 0; for (let i = 1; i <= total; i++) if (d[mod + ':' + i]) n++; return n }
+function loadLearn(mod){
+  if (!learnCache[mod]) learnCache[mod] = fetch('learn/' + mod + '.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() }).catch(e => { delete learnCache[mod]; throw e });
+  return learnCache[mod];
+}
+const LESSON_COUNT = { listening: 9, reading: 8, writing: 8, speaking: 4 };
+// Wrap each run of English (with brackets that hug it) in an LTR isolate so wrapping in RTL text never flips it.
+const EN_RUN = /\(?[A-Za-z0-9$£%\[][A-Za-z0-9 $£%.,'’&\/\-–+=:?!…#*@\[\]]*[A-Za-z0-9$£%?!…'’\]]\)?|\([A-Za-z]\)/g;
+const latinFirst = t => { const lat = (t.match(/[A-Za-z]/g) || []).length, fa = (t.match(/[\u0600-\u06FF]/g) || []).length; return lat > fa * 1.5 };
+const dirAttr = t => latinFirst(t) ? ' dir="ltr" class="ltr"' : '';
+const fxs = t => latinFirst(t) ? esc(t) : fx(t);
+function fx(t){
+  return esc(t).replace(/&amp;/g, '\u0001').replace(EN_RUN, m => {
+    if (!/[A-Za-z]/.test(m)) return m;
+    let a = m, pre = '', post = '';
+    if (a.startsWith('(') && !a.endsWith(')')) { pre = '('; a = a.slice(1) }
+    if (a.endsWith(')') && !a.startsWith('(')) { post = ')'; a = a.slice(0, -1) }
+    return `${pre}<bdi class="en">${a}</bdi>${post}`;
+  }).replace(/\u0001/g, '&amp;');
+}
+function lessonBlocks(blocks){
+  return blocks.map(b => {
+    if (b.t === 'p') return `<p${dirAttr(b.text)}>${fxs(b.text)}</p>`;
+    if (b.t === 'ul' || b.t === 'ol') return `<${b.t}>${b.items.map(x => `<li${dirAttr(x)}>${fxs(x)}</li>`).join('')}</${b.t}>`;
+    if (b.t === 'ex') return `<div class="lex" lang="en" dir="ltr">${b.items.map(x => `<div dir="auto">${esc(x)}</div>`).join('')}</div>`;
+    if (b.t === 'table') {
+      const [head, ...rows] = b.rows;
+      return `<div class="ltbl"><table><thead><tr>${head.map(c => `<th${dirAttr(c)}>${fxs(c)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td${dirAttr(c)}>${fxs(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    }
+    return '';
+  }).join('');
+}
+function renderLesson(mod, data, n){
+  const Ls = data.lessons, L = Ls.find(x => x.n === n) || Ls[0], cfg = LEARN[mod];
+  const i = Ls.indexOf(L), prev = Ls[i - 1], next = Ls[i + 1];
+  $('lsBack').href = cfg.base;
+  $('lsEyebrow').textContent = `${cfg.name} · Lesson ${L.n} of ${Ls.length}`;
+  $('lsDur').textContent = L.dur ? `▶ ${L.dur} video` : '';
+  const cards = L.cards.map(c => `<article class="lcard ${c.kind}"><h3>${c.n != null ? `<span class="cn">${faNum(c.n)}</span>` : (c.kind === 'warn' ? '<span aria-hidden="true">⚠</span>' : c.kind === 'do' ? '<span aria-hidden="true">✔</span>' : '')}<span>${fx(c.title)}</span></h3>${lessonBlocks(c.blocks)}</article>`).join('');
+  $('lsBody').innerHTML = `<h2 class="ftitle">${fx(L.title)}</h2>${L.sub ? `<p class="fsub">${fx(L.sub)}</p>` : ''}`
+    + (L.banner ? `<p class="lbanner">${fx(L.banner)}</p>` : '')
+    + (L.pills.length ? `<div class="lpills">${L.pills.map(x => `<span>${fx(x)}</span>`).join('')}</div>` : '')
+    + `<div class="lcards">${cards}</div>`;
+  const key = mod + ':' + L.n, done = !!learnDone()[key], btn = $('lsDone');
+  btn.setAttribute('aria-pressed', done); btn.textContent = done ? '✓ Read' : '✓ Mark as read';
+  btn.onclick = () => { const d = learnDone(); if (d[key]) delete d[key]; else d[key] = Date.now(); store.set('learnDone', d); renderLesson(mod, data, L.n) };
+  const pv = $('lsPrev'), nx = $('lsNext');
+  pv.hidden = !prev; if (prev) pv.href = `${cfg.base}/${prev.n}`;
+  nx.textContent = next ? 'Next lesson →' : 'Back to all lessons';
+  nx.href = next ? `${cfg.base}/${next.n}` : cfg.base;
+  nx.onclick = () => { if (!learnDone()[key]) { const d = learnDone(); d[key] = Date.now(); store.set('learnDone', d) } };
+  $('lsSrc').innerHTML = `Notes from the course <bdi dir="rtl" lang="fa">«${esc(data.source)}»</bdi> · lesson ${L.n}${L.dur ? ' · video ' + L.dur : ''}`;
+}
+function renderLearnList(mod, data){
+  const Ls = data.lessons, cfg = LEARN[mod], d = learnDone(), n = doneCount(mod, Ls.length);
+  $('llEyebrow').textContent = `${cfg.name} · ${Ls.length} lessons · Persian`;
+  $('llTitle').textContent = `${cfg.name} masterclass`;
+  $('llIntro').textContent = cfg.intro;
+  $('llProg').innerHTML = `<b>${n}</b> / ${Ls.length} read`;
+  $('llBar').style.width = (n / Ls.length * 100) + '%';
+  $('llItems').innerHTML = Ls.map(L => {
+    const done = !!d[mod + ':' + L.n];
+    return `<li><a href="${cfg.base}/${L.n}" class="${done ? 'done' : ''}"><span class="num">${L.n}</span><span class="lt" lang="fa">${fx(L.title)}</span><span class="ld">${done ? '✓ read' : (L.dur ? L.dur : '')}</span><span class="ls" lang="fa">${fx(L.sub)}</span></a></li>`;
+  }).join('');
+}
+function openLearn(mod, lesson){
+  const n = parseInt(lesson, 10);
+  $('learnList').hidden = !!n; $('learnLesson').hidden = !n;
+  $('llStatus').innerHTML = '';
+  if (!n) { $('llItems').innerHTML = ''; $('llStatus').className = 'status wait'; $('llStatus').innerHTML = '<span class="spin"></span> Loading lessons…' }
+  else $('lsBody').innerHTML = '<p class="meta" dir="ltr" style="text-align:left">Loading lesson…</p>';
+  loadLearn(mod).then(data => {
+    const h = location.hash; if (!(h === '#' + mod || h.startsWith('#' + mod + '/') || (mod === 'speaking' && h.startsWith('#speaking/lessons')))) return;
+    $('llStatus').innerHTML = '';
+    if (n) renderLesson(mod, data, n); else renderLearnList(mod, data);
+    window.scrollTo({ top: 0 });
+  }).catch(e => {
+    const msg = `Couldn't load the ${LEARN[mod].name} lessons (${esc(e.message)}). Check your connection and reload.`;
+    if (n) $('lsBody').innerHTML = `<p class="status bad" dir="ltr" style="text-align:left">${msg}</p>`; else { $('llStatus').className = 'status bad'; $('llStatus').innerHTML = msg }
+  });
 }
 
 /* Settings page bindings */
