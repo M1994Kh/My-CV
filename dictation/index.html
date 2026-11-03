@@ -543,8 +543,13 @@ body.drilling .study{padding:0}
         <select id="spkEngine">
           <option value="browser">Browser speech recognition (free, live)</option>
           <option value="groq">Groq Whisper (free key, more accurate)</option>
+          <option value="gemini">Gemini listens and marks (best for pronunciation)</option>
         </select>
       </div>
+    </div>
+    <div class="field" id="spkGemWrap" hidden>
+      <label for="spkGemModel">Gemini model <span class="meta">(Pro gives the most careful marking)</span></label>
+      <input type="text" id="spkGemModel" spellcheck="false" value="gemini-3.1-pro-preview" style="font:15px var(--f-mono);color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:8px 10px;width:100%">
     </div>
     <div class="toggles">
       <label><input type="checkbox" id="spkShowQ" checked> Show question text</label>
@@ -1014,8 +1019,8 @@ const PROVIDERS = {
     help:'Free key at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a>. "openrouter/free" picks any free model that is online. Free keys allow about 50 requests a day.' },
   pollinations: { name:'Pollinations', url:'https://gen.pollinations.ai/v1/chat/completions', model:'openai', key:'optional',
     help:'Get a free publishable key (starts with pk_) at <a href="https://enter.pollinations.ai" target="_blank" rel="noopener">enter.pollinations.ai</a>. It may work without a key, with tighter limits.' },
-  gemini: { name:'Google Gemini', url:'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', model:'gemini-2.5-flash', key:'required',
-    help:'Free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Google blocks some regions, so a VPN may be needed.' },
+  gemini: { name:'Google Gemini', url:'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', model:'gemini-3-flash-preview', key:'required',
+    help:'Key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Flash models are on the free tier; Pro models (e.g. gemini-3.1-pro-preview) need a paid key. Google blocks some regions, so a VPN may be needed.' },
   groq: { name:'Groq', url:'https://api.groq.com/openai/v1/chat/completions', model:'llama-3.3-70b-versatile', key:'required',
     help:'Free key at <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>. Very fast. Some regions need a VPN.' },
   custom: { name:'Custom (OpenAI-compatible)', url:'', model:'', key:'optional',
@@ -1024,7 +1029,7 @@ const PROVIDERS = {
 const aiProv = $('aiProvider');
 Object.entries(PROVIDERS).forEach(([id, p]) => { const o = document.createElement('option'); o.value = id; o.textContent = p.name; aiProv.appendChild(o) });
 aiProv.value = store.get('aiProvider', 'openrouter');
-function provCfg(id = aiProv.value){ const p = PROVIDERS[id], s = store.get('ai:'+id, {}); return { ...p, id, key: s.key || '', model: s.model || p.model, url: s.url || p.url } }
+function provCfg(id = aiProv.value){ const p = PROVIDERS[id], s = store.get('ai:'+id, {}); if (id === 'gemini' && /^gemini-(1|2)\./.test(s.model || '')) s.model = ''; return { ...p, id, key: s.key || '', model: s.model || p.model, url: s.url || p.url } }
 function loadProv(){
   const c = provCfg();
   $('aiModel').value = c.model; $('aiKey').value = c.key; $('aiUrl').value = c.url;
@@ -1516,6 +1521,8 @@ $('spkEngine').value = store.get('spkEngine', SRClass ? 'browser' : 'groq');
 function engineNote(){
   const e = $('spkEngine').value;
   store.set('spkEngine', e);
+  $('spkGemWrap').hidden = e !== 'gemini';
+  if (e === 'gemini') { $('spkEngineNote').innerHTML = `Your answers are recorded, and at the end Gemini <b>listens to the audio</b> itself: it writes a word-for-word transcript (fillers included) and marks pronunciation from your real voice, including sounds, word stress and intonation. It uses the Gemini key in AI settings (provider: Google Gemini) ${provCfg('gemini').key ? '<b style="color:var(--good)">· key saved ✓</b>' : '<b style="color:var(--bad)">· no key saved yet</b>'}. Google blocks some regions, so you may need a VPN.`; aiInfo(); return }
   $('spkEngineNote').innerHTML = e === 'browser'
     ? (SRClass ? 'Live transcription is built into your browser and free. In Chrome it is processed by Google, so it may need a VPN in some regions. It tends to drop “um” and “uh”, so hesitation is judged from timing instead.' : '<b>This browser has no built-in speech recognition.</b> Use Chrome, Edge or Safari, or switch to Groq Whisper.')
     : `Your answers are recorded and sent to Groq Whisper after each one. It is more accurate and keeps fillers like “um”. It needs a free Groq key in AI settings (provider: Groq) ${provCfg('groq').key ? '<b style="color:var(--good)">· key saved ✓</b>' : '<b style="color:var(--bad)">· no key saved yet</b>'}.`;
@@ -1531,7 +1538,8 @@ function fillSpkVoices(){
   if (saved && vs.some(v => v.name === saved)) sel.value = saved;
 }
 $('spkVoice').onchange = () => store.set('spkVoice', $('spkVoice').value);
-function aiInfo(){ $('spkAiInfo').textContent = `Marking by: ${PROVIDERS[aiProv.value].name}${provCfg().key || PROVIDERS[aiProv.value].key !== 'required' ? '' : ' (key needed)'}` }
+$('spkGemModel').value = store.get('spkGemModel', 'gemini-3.1-pro-preview'); $('spkGemModel').onchange = () => store.set('spkGemModel', $('spkGemModel').value.trim());
+function aiInfo(){ if ($('spkEngine').value === 'gemini') { $('spkAiInfo').textContent = 'Marking by: Google Gemini (listens to your audio)'; return } $('spkAiInfo').textContent = `Marking by: ${PROVIDERS[aiProv.value].name}${provCfg().key || PROVIDERS[aiProv.value].key !== 'required' ? '' : ' (key needed)'}` }
 aiInfo();
 $('spkAiSet').onclick = () => { location.hash = '#dictation'; setTimeout(() => { $('aiSettings').hidden = false; $('aiSetToggle').setAttribute('aria-expanded', 'true'); $('aiBox').scrollIntoView({ behavior: 'smooth' }) }, 50) };
 function spkStatus(html, kind){ const s = $('spkStatus'); s.className = 'status ' + (kind || ''); s.innerHTML = html }
@@ -1762,11 +1770,12 @@ async function startExam(plan){
   if (exam) return;
   const engine = $('spkEngine').value;
   if (engine === 'browser' && !SRClass) { spkStatus('This browser has no speech recognition. Switch Transcription to Groq Whisper, or open the app in Chrome, Edge or Safari.', 'err'); showSpk('home'); return }
+  if (engine === 'gemini' && !provCfg('gemini').key) { spkStatus('Gemini needs your API key. Open AI settings, choose Google Gemini and paste your key.', 'err'); showSpk('home'); return }
   if (engine === 'groq' && !provCfg('groq').key) { spkStatus('Groq Whisper needs a free Groq key. Open AI settings, choose Groq and paste your key.', 'err'); showSpk('home'); return }
   if (micTestTimer) $('micTest').click();
   // Phones often cannot record and run speech recognition at the same time, so only the recognizer listens there.
   const audioOK = !(engine === 'browser' && isTouch());
-  try { if (audioOK || engine === 'groq') await ensureMic() } catch (e) { spkStatus(esc(e.message), 'err'); showSpk('home'); return }
+  try { if (audioOK || engine !== 'browser') await ensureMic() } catch (e) { spkStatus(esc(e.message), 'err'); showSpk('home'); return }
   if (!audioOK) releaseMic();
   spkStatus('');
   exam = { plan, engine, answers: [], t0: performance.now(), token: Symbol(), pending: [], srWarned: false };
@@ -1845,7 +1854,7 @@ async function runPart2(st, alive){
 function keepAnswer(st, ans){
   const a = { part: st.part, q: st.part === 2 ? st.card.title + ' — You should say: ' + st.card.bullets.join('; ') + '; ' + (st.card.explain || '') : st.q, shortQ: st.q, ...ans, transcript: '', conf: null, url: ans.blob ? URL.createObjectURL(ans.blob) : null };
   if (exam.engine === 'browser') { a.transcript = ans.sr ? ans.sr.text : ''; a.conf = ans.sr ? ans.sr.conf : null }
-  else if (ans.blob) {
+  else if (exam.engine === 'groq' && ans.blob) {
     a.tx = whisper(ans.blob).then(r => { a.transcript = r.text; a.conf = r.conf }).catch(e => { a.txErr = e.message });
     exam.pending.push(a.tx);
   }
@@ -1911,9 +1920,11 @@ async function finishExam(){
   ex.answers.forEach(a => { if (!a.transcript) a.transcript = '' });
   const session = { id: Date.now().toString(36), date: new Date().toISOString(), label: ex.plan.label, mode: ex.plan.mode, engine: ex.engine, accent: $('accent').value,
     answers: ex.answers.map(a => ({ part: a.part, q: a.q, shortQ: a.shortQ, transcript: a.transcript, dur: a.dur, span: a.span, latency: a.latency, pauses: a.pauses, longest: a.longest, conf: a.conf, txErr: a.txErr || null, url: a.url })) };
+  session._blobs = ex.answers.map(a => a.blob || null);
   await markSession(session);
 }
 async function markSession(session){
+  if (session.engine === 'gemini') return markWithGemini(session);
   const rep = $('spkReport');
   const said = session.answers.filter(a => a.transcript && wordsOf(a.transcript).length >= 3);
   if (!said.length) {
@@ -1997,7 +2008,7 @@ function renderReport(s, r, err){
     ${tile(m.words, 'words spoken')}
     ${tile(m.latency != null ? m.latency + 's' : null, 'average time to start', grade('lat', m.latency))}
     ${m.pauses != null ? tile(m.pauses, 'pauses longer than 1.2 s', grade('pz', m.pauses / Math.max(1, m.answers) * 3)) : ''}
-    ${tile(s.engine === 'groq' ? m.fillers : 'n/a', s.engine === 'groq' ? 'um / uh fillers' : 'fillers (browser hides them)')}
+    ${tile(s.engine !== 'browser' ? m.fillers : 'n/a', s.engine !== 'browser' ? 'um / uh fillers' : 'fillers (browser hides them)')}
     ${tile(m.uniq, 'different content words')}
     ${m.p2len != null ? tile(fmt(m.p2len), 'Part 2 long turn', grade('p2', m.p2len)) : ''}
     ${m.conf != null ? tile(m.conf + '%', 'recognizer confidence') : ''}
@@ -2005,6 +2016,7 @@ function renderReport(s, r, err){
   if (r && r.criteria) h += `<div class="rsec"><h3>Criteria in detail</h3><div class="critnotes">${CRIT.map(([k, n]) => { const c = r.criteria[k] || {}; return `<div class="cn"><h4><span>${n}</span><span>${r.bands[k].toFixed(1)}</span></h4><div style="font-size:14.5px">${esc(c.comment || '')}</div>${(c.evidence || []).length ? `<ul>${c.evidence.slice(0, 4).map(e => `<li>${esc(String(e))}</li>`).join('')}</ul>` : ''}</div>` }).join('')}</div></div>`;
   if (r && (r.strengths || []).length) h += `<div class="rsec"><h3>What you did well</h3><ul class="plan" style="list-style:disc">${r.strengths.map(x => `<li>${esc(String(x))}</li>`).join('')}</ul></div>`;
   if (r && (r.mistakes || []).length) h += `<div class="rsec"><h3>Mistakes to fix</h3><ul class="mlist">${r.mistakes.map(x => `<li><span class="mt">${esc(x.type || 'language')}</span><span class="said">${esc(x.said || '')}</span><span class="better">→ ${esc(x.better || '')}</span><span class="why">${esc(x.why || '')}</span></li>`).join('')}</ul></div>`;
+  if (r && Array.isArray(r.pronunciation) && r.pronunciation.length) h += `<div class="rsec"><h3>Pronunciation to work on</h3><ul class="mlist">${r.pronunciation.map(x => `<li><span class="mt">${esc(x.word || '')}</span>${x.heard ? `<span class="why">You said: ${esc(x.heard)}</span>` : ''}${x.target ? `<span class="better">→ ${esc(x.target)}</span>` : ''}${x.tip ? `<span class="why">${esc(x.tip)}</span>` : ''}</li>`).join('')}</ul></div>`;
   if (r && (r.vocabulary || []).length) h += `<div class="rsec"><h3>Vocabulary upgrades</h3><div class="vocab">${r.vocabulary.map(v => `<div><span class="from">${esc(v.used || '')}</span> → <span class="to">${esc([].concat(v.better || []).join(', '))}</span>${v.example ? `<div class="meta" style="margin-top:4px">${esc(v.example)}</div>` : ''}</div>`).join('')}</div></div>`;
   h += `<div class="rsec qa"><h3>Your answers</h3>${s.answers.map((a, i) => {
     const mm = metricsOf(a), fb = r && (r.answers || []).find(x => Number(x.n) === i + 1);
@@ -2016,10 +2028,10 @@ function renderReport(s, r, err){
     </details>` }).join('')}</div>`;
   if (r && (r.plan || []).length) h += `<div class="rsec"><h3>Your improvement plan</h3><ol class="plan">${r.plan.map(p => `<li><b>${esc(p.focus || '')}</b>${p.why ? `<span class="meta">${esc(p.why)}</span><br>` : ''}${esc(p.how || '')}</li>`).join('')}</ol></div>`;
   if (r && r.band7) h += `<div class="rsec"><h3>A band 7.5–8 model answer</h3><div class="model">${esc(String(r.band7))}</div></div>`;
-  h += `<div class="caveat">* Bands are an AI estimate based on the IELTS public band descriptors, not an official result. Pronunciation can only be judged indirectly from speech-recognition confidence and timing. Transcription mistakes can be mistaken for your mistakes.</div>
+  h += `<div class="caveat">* Bands are an AI estimate based on the IELTS public band descriptors, not an official result. ${r && r.listened ? 'Gemini (' + esc(r.model || '') + ') listened to your recordings, so pronunciation was judged from your real voice.' : 'Pronunciation can only be judged indirectly from speech-recognition confidence and timing. Transcription mistakes can be mistaken for your mistakes.'}</div>
   <div class="row noprint">
     <button class="btn btn-primary" id="rpNew" type="button">New test</button>
-    ${err && s.answers.some(a => a.transcript) ? '<button class="btn btn-ghost" id="rpRetry" type="button">Try marking again</button>' : ''}
+    ${err && (s.answers.some(a => a.transcript) || (s._blobs && s._blobs.some(Boolean))) ? '<button class="btn btn-ghost" id="rpRetry" type="button">Try marking again</button>' : ''}
     ${r ? '<button class="btn btn-ghost" id="rpCopy" type="button">Copy report</button>' : ''}
     ${window.self === window.top && r ? '<button class="btn btn-ghost" id="rpPrint" type="button">Print / save as PDF</button>' : ''}
     <button class="btn btn-ghost" id="rpHome" type="button">Back to flashcards</button>
@@ -2041,10 +2053,129 @@ function reportText(s, r){
   return L.join('\n');
 }
 
+
+/* ---------- Gemini: listens to the audio, transcribes and marks in one request ---------- */
+function blobToB64(blob){ return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1] || ''); fr.onerror = rej; fr.readAsDataURL(blob) }) }
+async function toWav(blob, rate){
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const ctx = new AC(); let buf;
+  try { buf = await ctx.decodeAudioData(await blob.arrayBuffer()) } finally { try { ctx.close() } catch (e) {} }
+  const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const off = new OAC(1, Math.max(1, Math.ceil(buf.duration * rate)), rate);
+  const src = off.createBufferSource(); src.buffer = buf; src.connect(off.destination); src.start();
+  const out = await off.startRendering(), pcm = out.getChannelData(0);
+  const ab = new ArrayBuffer(44 + pcm.length * 2), v = new DataView(ab);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)) };
+  w(0, 'RIFF'); v.setUint32(4, 36 + pcm.length * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, pcm.length * 2, true);
+  for (let i = 0; i < pcm.length; i++) { const s = Math.max(-1, Math.min(1, pcm[i])); v.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true) }
+  return new Blob([ab], { type: 'audio/wav' });
+}
+const GEM_BASE = 'https://generativelanguage.googleapis.com/v1beta/';
+async function geminiModels(key){
+  const r = await fetch(GEM_BASE + 'models?pageSize=200', { headers: { 'x-goog-api-key': key } });
+  if (!r.ok) return [];
+  const j = await r.json();
+  return (j.models || []).filter(m => (m.supportedGenerationMethods || []).includes('generateContent')).map(m => m.name.replace(/^models\//, ''));
+}
+function bestGemini(list, wantPro){
+  const ver = n => { const m = n.match(/gemini-(\d+(?:\.\d+)?)/); return m ? parseFloat(m[1]) : 0 };
+  const ok = list.filter(n => /^gemini-\d/.test(n) && !/(image|tts|embedding|live|audio|vision|thinking-exp|-lite)/.test(n) && (wantPro ? /-pro/.test(n) : /-flash/.test(n)));
+  ok.sort((a, b) => ver(b) - ver(a) || (/preview|exp/.test(a) ? 1 : 0) - (/preview|exp/.test(b) ? 1 : 0));
+  return ok[0];
+}
+async function geminiCall(model, key, body){
+  let r;
+  try { r = await fetch(GEM_BASE + 'models/' + encodeURIComponent(model) + ':generateContent', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body) }) }
+  catch (e) { throw new Error('Could not reach Google Gemini. It is not available in some regions, so you may need a VPN.') }
+  if (r.ok) return r.json();
+  let msg = ''; try { const j = await r.json(); msg = (j.error && j.error.message) || '' } catch (e) {}
+  const err = new Error(msg || ('Gemini error ' + r.status)); err.status = r.status; throw err;
+}
+async function markWithGemini(session){
+  const rep = $('spkReport'), say = t => { const m = $('markMsg'); if (m) m.textContent = t };
+  const c = provCfg('gemini');
+  if (!c.key) { renderReport(session, null, 'Gemini needs your API key. Open AI settings, choose Google Gemini, paste the key, then press “Try marking again”.'); return }
+  const blobs = session._blobs || [];
+  const idx = session.answers.map((a, i) => i).filter(i => blobs[i]);
+  if (!idx.length) { renderReport(session, null, 'No audio was recorded, so Gemini has nothing to listen to. Check the microphone and try again.'); return }
+  // keep the request under Gemini's inline size limit by choosing the sample rate
+  const total = idx.reduce((s, i) => s + (session.answers[i].dur || 10), 0);
+  const rate = Math.max(8000, Math.min(16000, Math.floor(14e6 / (total * 2 * 1.37))));
+  say(`Preparing ${idx.length} recordings for Gemini…`);
+  const parts = [];
+  const spell = session.accent === 'en-US' ? 'American' : 'British';
+  parts.push({ text: `This is a candidate's IELTS Speaking ${session.label}. Below are ${session.answers.length} answers in order. Each answer has the question, timing measured by the recording app, and the audio recording of the candidate.` });
+  for (const i of session.answers.keys()) {
+    const a = session.answers[i];
+    parts.push({ text: `\n#${i + 1} [Part ${a.part}] Question: ${a.q}\nTiming: answered for ${Math.round(a.dur)}s, started speaking after ${a.latency == null ? 'n/a' : a.latency.toFixed(1) + 's'}, ${a.pauses == null ? 'pauses n/a' : a.pauses + ' pauses over 1.2s (longest ' + (a.longest || 0).toFixed(1) + 's)'}.${blobs[i] ? '' : '\n(No audio for this answer.)'}` });
+    if (blobs[i]) {
+      let b; try { b = await toWav(blobs[i], rate) } catch (e) { b = blobs[i] }
+      parts.push({ inline_data: { mime_type: b.type.split(';')[0] || 'audio/webm', data: await blobToB64(b) } });
+    }
+  }
+  parts.push({ text: `
+Listen to every recording carefully. First write a verbatim transcript of each answer exactly as spoken, keeping fillers (um, uh, er), repetitions, false starts and grammar mistakes. Do not correct the transcript.
+Then assess the candidate as a strict, experienced IELTS Speaking examiner using the public band descriptors, giving each criterion a band from 1 to 9 in steps of 0.5:
+- fc = Fluency and Coherence (answer length, hesitation, pauses, speed, linking, development of ideas)
+- lr = Lexical Resource (range, precision, collocation, idiomatic language, paraphrase)
+- gra = Grammatical Range and Accuracy (complex structures, tense control, error frequency)
+- pron = Pronunciation, judged from the AUDIO: individual sounds, word stress, sentence stress, intonation, chunking, connected speech, and how much effort the listener needs. Note any L1-influenced patterns.
+Rules: do not inflate. Very short answers (under 15 words in Part 1, under 60 seconds in Part 2) limit fc and lr. Quote the candidate's exact words in mistakes. Write corrections in ${spell} English. List up to 12 real mistakes, most important first, and up to 8 specific pronunciation problems.
+Reply with ONE JSON object only:
+{"transcripts":["verbatim transcript of answer #1", "... one string per answer, in order"],
+"bands":{"fc":0,"lr":0,"gra":0,"pron":0},
+"summary":"3-4 sentences overall judgement, addressed to the candidate as 'you'",
+"criteria":{"fc":{"comment":"...","evidence":["..."]},"lr":{"comment":"...","evidence":["..."]},"gra":{"comment":"...","evidence":["..."]},"pron":{"comment":"...","evidence":["..."]}},
+"pronunciation":[{"word":"word or phrase","heard":"how it sounded, e.g. /ˈvedʒtəbəl/ said as 've-ge-TA-ble'","target":"correct ${spell} pronunciation with IPA and stress","tip":"how to fix it"}],
+"strengths":["..."],
+"mistakes":[{"said":"exact words","better":"corrected version","type":"grammar|vocabulary|collocation|word choice|coherence|pronunciation","why":"one sentence"}],
+"vocabulary":[{"used":"basic word they used","better":["higher-level option","another"],"example":"example sentence"}],
+"answers":[{"n":1,"comment":"1-2 sentences on this answer","tip":"one concrete improvement"}],
+"plan":[{"focus":"skill to work on","why":"evidence from this test","how":"specific daily practice for the next 2 weeks"}],
+"band7":"For the weakest answer, a natural ${spell}-English answer at band 7.5-8 (Part 2 about 220 words, others 50-90 words). First line: which question, e.g. 'Q#3: ...'"}` });
+  const body = {
+    systemInstruction: { parts: [{ text: 'You are a senior, certified IELTS Speaking examiner. You listen carefully, transcribe faithfully, and mark strictly and consistently with the official IELTS Speaking band descriptors. You always reply with a single valid JSON object.' }] },
+    contents: [{ role: 'user', parts }],
+    generationConfig: { temperature: 0.2, responseMimeType: 'application/json', maxOutputTokens: 16384 }
+  };
+  let model = $('spkGemModel').value.trim() || 'gemini-3.1-pro-preview';
+  say(`Gemini (${model}) is listening to your answers and marking them. This can take one to three minutes.`);
+  let j;
+  try {
+    try { j = await geminiCall(model, c.key, body) }
+    catch (e) {
+      if (e.status !== 404) throw e;
+      const alt = bestGemini(await geminiModels(c.key), /pro/.test(model)) || bestGemini(await geminiModels(c.key), false);
+      if (!alt) throw e;
+      model = alt; $('spkGemModel').value = alt; store.set('spkGemModel', alt);
+      say(`That model is retired, so the newest one (${alt}) is being used instead…`);
+      j = await geminiCall(model, c.key, body);
+    }
+    const text = ((j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || []).filter(p => !p.thought).map(p => p.text || '').join('');
+    const r = parseObj(text);
+    if (!r || !r.bands) throw new Error(j.candidates && j.candidates[0] && j.candidates[0].finishReason === 'MAX_TOKENS' ? 'Gemini’s report was cut off. Try marking again.' : 'Gemini’s reply could not be read. Try marking again.');
+    (r.transcripts || []).forEach((t, i) => { if (session.answers[i]) session.answers[i].transcript = String(t || '').trim() });
+    ['fc', 'lr', 'gra', 'pron'].forEach(k => { let v = Number(r.bands[k]); if (!isFinite(v)) v = 0; r.bands[k] = Math.max(1, Math.min(9, Math.round(v * 2) / 2)) });
+    r.overall = ieltsRound((r.bands.fc + r.bands.lr + r.bands.gra + r.bands.pron) / 4);
+    r.model = model; r.listened = true;
+    session.report = r;
+    saveHistory(session);
+    renderReport(session, r);
+  } catch (e) {
+    let m = e.message || 'Gemini could not mark the test.';
+    if (/api key not valid|API_KEY_INVALID/i.test(m) || e.status === 401) m = 'Google rejected the Gemini key. Check it in AI settings (Google Gemini).';
+    else if (/location is not supported|not available in your country/i.test(m)) m = 'Gemini is not available from your location. Turn on a VPN and press “Try marking again”.';
+    else if (e.status === 429) m = `Your Gemini quota for ${model} is used up. Wait a little, or switch the model to a Flash model (for example gemini-3-flash-preview) and try again.`;
+    else if (e.status === 413 || /too large|payload/i.test(m)) m = 'The recordings were too large to send in one go. Try a single part instead of the full test.';
+    renderReport(session, null, m);
+  }
+}
+
 /* ---------- History ---------- */
 function saveHistory(s){
   const hist = store.get('spkHist', []);
-  const lite = { ...s, answers: s.answers.map(a => ({ ...a, url: null })) };
+  const lite = { ...s, _blobs: undefined, answers: s.answers.map(a => ({ ...a, url: null })) };
   hist.unshift(lite); store.set('spkHist', hist.slice(0, 30)); renderHistory();
 }
 function renderHistory(){
