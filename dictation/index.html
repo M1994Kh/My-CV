@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2747d6">
+<meta name="description" content="Dictation trainer: listen, type what you hear, and re-learn every word you misspell. Fresh word lists from AI.">
 <title>Dictation Drill</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -123,6 +129,23 @@ kbd{font:600 11.5px var(--f-mono);border:1px solid var(--rule);border-bottom-wid
 .trouble span{font:13px var(--f-mono);background:var(--bad-soft);color:var(--bad);border-radius:6px;padding:2px 8px}
 .note{font-size:13.5px;color:var(--muted);background:var(--paper);border-radius:10px;padding:10px 12px;border:1px solid var(--rule)}
 footer{text-align:center;color:var(--muted);font-size:13px}
+.brand{display:flex;gap:16px;align-items:center}
+.brand .logo{width:58px;height:58px;flex:none;border-radius:14px;box-shadow:var(--shadow)}
+.brand .txt{min-width:0}
+
+/* AI generator */
+.ai{border:1px solid var(--cobalt);background:var(--cobalt-soft);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.ai-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.ai-head strong{font-family:var(--f-display);font-size:17px;color:var(--cobalt)}
+.ai input[type=text],.ai input[type=password],.ai select{font:15px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:8px 10px;width:100%}
+.ai .grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.linkbtn{background:none;border:0;color:var(--cobalt);font:600 14px var(--f-body);cursor:pointer;padding:4px 2px;text-decoration:underline;text-underline-offset:3px}
+.aiset{border-top:1px dashed var(--cobalt);padding-top:12px;display:flex;flex-direction:column;gap:12px}
+.aiset a{color:var(--cobalt)}
+.status{font-size:14px;min-height:1.4em}
+.status.err{color:var(--bad)} .status.ok{color:var(--good)} .status.wait{color:var(--muted)}
+.spin{width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:sp .7s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
 @media (max-width:520px){.sheet{padding:18px}.stats{grid-template-columns:1fr 1fr 1fr}.stat b{font-size:24px}
   .mistakes li,.colhead{grid-template-columns:minmax(0,1fr) auto}.mistakes .you,.colhead .c2{display:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -133,14 +156,84 @@ footer{text-align:center;color:var(--muted);font-size:13px}
 <div class="wrap">
   <header>
     <div class="brand">
-      <h1>Dictation Drill<span class="dot">.</span></h1>
-      <p>Listen, type what you hear, and move on only when the spelling is right. Every word you miss comes back at the end for a second lesson.</p>
+      <svg class="logo" viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3556e8"/><stop offset="1" stop-color="#1c34a8"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#lg)"/><g stroke="#fff" stroke-opacity=".1" stroke-width="6"><line x1="64" y1="150" x2="448" y2="150"/><line x1="64" y1="226" x2="448" y2="226"/><line x1="64" y1="302" x2="448" y2="302"/></g><path d="M104 196h44l58-48c8-6 18-1 18 9v170c0 10-10 15-18 9l-58-48h-44c-8 0-14-6-14-14v-64c0-8 6-14 14-14z" fill="#fff"/><g fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"><path d="M266 196a64 64 0 0 1 0 92"/><path d="M312 156a122 122 0 0 1 0 172" stroke-opacity=".75"/></g><rect x="374" y="148" width="24" height="188" rx="12" fill="#ffe266"/><rect x="90" y="378" width="308" height="30" rx="15" fill="#ffe266"/></svg>
+      <div class="txt">
+        <h1>Dictation Drill<span class="dot">.</span></h1>
+        <p>Listen, type what you hear, and move on only when the spelling is right. Every word you miss comes back at the end for a second lesson.</p>
+      </div>
     </div>
   </header>
 
   <!-- SETUP -->
   <section class="sheet" id="setup">
     <div><div class="eyebrow">Step 1 · Material</div><h2>What should I read to you?</h2></div>
+    <div class="ai" id="aiBox">
+      <div class="ai-head">
+        <strong>✦ Fresh words from AI</strong>
+        <button type="button" class="linkbtn" id="aiSetToggle" aria-expanded="false">AI settings</button>
+      </div>
+      <div class="grid">
+        <div class="field">
+          <label for="aiTopic">Topic</label>
+          <select id="aiTopic">
+            <option>IELTS Listening (names, places, forms, dates)</option>
+            <option>IELTS Academic vocabulary</option>
+            <option>Commonly misspelled English words</option>
+            <option>Mining, geology and mineral processing</option>
+            <option>Science and engineering</option>
+            <option>Business and work</option>
+            <option>Everyday life and travel</option>
+            <option value="custom">Custom topic…</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="aiLevel">Level</label>
+          <select id="aiLevel"><option value="B1">B1 · intermediate</option><option value="B2" selected>B2 · upper-intermediate</option><option value="C1">C1 · advanced</option><option value="C2">C2 · proficient</option></select>
+        </div>
+        <div class="field">
+          <label for="aiCount">How many</label>
+          <select id="aiCount"><option>10</option><option selected>20</option><option>30</option><option>40</option></select>
+        </div>
+      </div>
+      <div class="field" id="aiCustomWrap" hidden>
+        <label for="aiCustom">Your topic</label>
+        <input type="text" id="aiCustom" placeholder="e.g. hospital vocabulary, climate change, football">
+      </div>
+      <div class="row">
+        <button class="btn btn-primary" id="aiGo" type="button">✦ Get new words</button>
+        <label class="meta" style="font-weight:400;display:flex;gap:6px;align-items:center"><input type="checkbox" id="aiAuto"> Start right away</label>
+      </div>
+      <div class="status" id="aiStatus" role="status"></div>
+
+      <div class="aiset" id="aiSettings" hidden>
+        <div class="grid">
+          <div class="field">
+            <label for="aiProvider">Provider</label>
+            <select id="aiProvider"></select>
+          </div>
+          <div class="field">
+            <label for="aiModel">Model</label>
+            <input type="text" id="aiModel" spellcheck="false">
+          </div>
+        </div>
+        <div class="field" id="aiUrlWrap" hidden>
+          <label for="aiUrl">Chat completions URL <span class="meta">(any OpenAI-compatible API)</span></label>
+          <input type="text" id="aiUrl" spellcheck="false" placeholder="https://your-server/v1/chat/completions">
+        </div>
+        <div class="field">
+          <label for="aiKey">API key <span class="meta" id="aiKeyNote"></span></label>
+          <input type="password" id="aiKey" autocomplete="off" spellcheck="false" placeholder="Paste your free key">
+        </div>
+        <div class="meta" id="aiHelp"></div>
+        <div class="row">
+          <button type="button" class="btn btn-ghost" id="aiTest">Test connection</button>
+          <button type="button" class="btn btn-ghost" id="aiForget">Clear word history</button>
+          <span class="meta" id="aiSeen"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="eyebrow">Or use a ready list</div>
     <div class="presets" id="presets"></div>
     <div class="field">
       <label for="src">Words or text <span class="meta">(paste anything: a word list, one per line, or a paragraph)</span></label>
@@ -387,7 +480,7 @@ const shuffle = arr => { arr = arr.slice(); for (let i = arr.length-1; i > 0; i-
 
 function startSession(items){
   if (synth) synth.cancel();
-  sessionItems = items; log = new Map(); round = 0; phase = 'drill';
+  sessionItems = items; log = new Map(); round = 0; phase = 'drill'; addSeen(items);
   queue = $('optShuffle').checked ? shuffle(items) : items.slice();
   items.forEach(w => log.set(w, {attempts:[], wrong:false, firstTry:true}));
   pos = 0; show('drill'); loadItem();
@@ -591,6 +684,131 @@ function updateTroubleBtn(){
 }
 $('troubleBtn').onclick = () => { const t = Object.keys(store.get('trouble', {})); if (t.length) startSession(t) };
 updateTroubleBtn();
+
+/* ---------- AI word generator ---------- */
+const PROVIDERS = {
+  openrouter: { name:'OpenRouter · free models', url:'https://openrouter.ai/api/v1/chat/completions', model:'openrouter/free', key:'required',
+    help:'Free key at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a>. "openrouter/free" picks any free model that is online. Free keys allow about 50 requests a day.' },
+  pollinations: { name:'Pollinations', url:'https://gen.pollinations.ai/v1/chat/completions', model:'openai', key:'optional',
+    help:'Get a free publishable key (starts with pk_) at <a href="https://enter.pollinations.ai" target="_blank" rel="noopener">enter.pollinations.ai</a>. It may work without a key, with tighter limits.' },
+  gemini: { name:'Google Gemini', url:'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', model:'gemini-2.5-flash', key:'required',
+    help:'Free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Google blocks some regions, so a VPN may be needed.' },
+  groq: { name:'Groq', url:'https://api.groq.com/openai/v1/chat/completions', model:'llama-3.3-70b-versatile', key:'required',
+    help:'Free key at <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>. Very fast. Some regions need a VPN.' },
+  custom: { name:'Custom (OpenAI-compatible)', url:'', model:'', key:'optional',
+    help:'Any server that speaks the OpenAI chat completions format, such as your own VPS proxy, LM Studio or Ollama. The server must allow browser requests (CORS).' }
+};
+const aiProv = $('aiProvider');
+Object.entries(PROVIDERS).forEach(([id, p]) => { const o = document.createElement('option'); o.value = id; o.textContent = p.name; aiProv.appendChild(o) });
+aiProv.value = store.get('aiProvider', 'openrouter');
+function provCfg(id = aiProv.value){ const p = PROVIDERS[id], s = store.get('ai:'+id, {}); return { ...p, id, key: s.key || '', model: s.model || p.model, url: s.url || p.url } }
+function loadProv(){
+  const c = provCfg();
+  $('aiModel').value = c.model; $('aiKey').value = c.key; $('aiUrl').value = c.url;
+  $('aiUrlWrap').hidden = c.id !== 'custom';
+  $('aiKeyNote').textContent = c.key === '' && PROVIDERS[c.id].key === 'required' ? '(required)' : PROVIDERS[c.id].key === 'optional' ? '(optional)' : '(saved in this browser only)';
+  $('aiHelp').innerHTML = PROVIDERS[c.id].help + ' Your key is kept only in this browser and sent only to the provider.';
+}
+function saveProv(){
+  store.set('aiProvider', aiProv.value);
+  store.set('ai:'+aiProv.value, { key: $('aiKey').value.trim(), model: $('aiModel').value.trim(), url: $('aiUrl').value.trim() });
+}
+aiProv.onchange = () => { store.set('aiProvider', aiProv.value); loadProv() };
+['aiKey','aiModel','aiUrl'].forEach(id => $(id).addEventListener('change', saveProv));
+loadProv();
+$('aiSetToggle').onclick = () => { const s = $('aiSettings'); s.hidden = !s.hidden; $('aiSetToggle').setAttribute('aria-expanded', String(!s.hidden)) };
+$('aiTopic').onchange = () => { $('aiCustomWrap').hidden = $('aiTopic').value !== 'custom'; store.set('aiTopic', $('aiTopic').value) };
+$('aiTopic').value = store.get('aiTopic', $('aiTopic').options[0].value); $('aiTopic').onchange();
+$('aiCustom').value = store.get('aiCustom', ''); $('aiCustom').oninput = () => store.set('aiCustom', $('aiCustom').value);
+$('aiLevel').value = store.get('aiLevel','B2'); $('aiLevel').onchange = () => store.set('aiLevel', $('aiLevel').value);
+$('aiCount').value = store.get('aiCount','20'); $('aiCount').onchange = () => store.set('aiCount', $('aiCount').value);
+$('aiAuto').checked = store.get('aiAuto', false); $('aiAuto').onchange = () => store.set('aiAuto', $('aiAuto').checked);
+
+/* words already met, so the AI keeps bringing new ones */
+const getSeen = () => store.get('seen', []);
+function addSeen(items){
+  const seen = getSeen(), have = new Set(seen.map(s => s.toLowerCase()));
+  items.forEach(w => { const k = w.toLowerCase(); if (!have.has(k) && w.length < 60) { seen.push(w); have.add(k) } });
+  store.set('seen', seen.slice(-2000)); showSeen();
+}
+function showSeen(){ const n = getSeen().length; $('aiSeen').textContent = n ? `${n} words remembered, so they won't repeat` : '' }
+showSeen();
+$('aiForget').onclick = () => { store.set('seen', []); showSeen(); aiStatus('Word history cleared. Old words may come back now.', 'ok') };
+
+function aiStatus(html, kind){ const s = $('aiStatus'); s.className = 'status ' + (kind || ''); s.innerHTML = html }
+
+async function callLLM(messages, {maxTokens = 4000, timeout = 90000} = {}){
+  saveProv();
+  const c = provCfg();
+  if (!c.url) throw new Error('Add the chat completions URL in AI settings.');
+  if (PROVIDERS[c.id].key === 'required' && !c.key) { $('aiSettings').hidden = false; $('aiSetToggle').setAttribute('aria-expanded','true'); throw new Error(`${PROVIDERS[c.id].name} needs a free API key. Paste it in AI settings below.`) }
+  const headers = { 'Content-Type': 'application/json' };
+  if (c.key) headers.Authorization = 'Bearer ' + c.key;
+  if (c.id === 'openrouter') { headers['X-Title'] = 'Dictation Drill'; try { headers['HTTP-Referer'] = location.origin } catch(e){} }
+  const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), timeout);
+  let res;
+  try {
+    res = await fetch(c.url, { method:'POST', headers, signal: ctrl.signal,
+      body: JSON.stringify({ model: c.model, messages, temperature: 0.9, max_tokens: maxTokens }) });
+  } catch (e) {
+    throw new Error(e.name === 'AbortError' ? 'The AI took too long to answer. Try again or pick another model.' : `Couldn't reach ${PROVIDERS[c.id].name}. It may be blocked on your network. Try a VPN or another provider.`);
+  } finally { clearTimeout(t) }
+  if (!res.ok) {
+    let detail = ''; try { const j = await res.json(); detail = (j.error && (j.error.message || j.error)) || j.message || '' } catch(e){}
+    if (res.status === 401 || res.status === 403) throw new Error('The API key was rejected. Check it in AI settings.' + (detail ? ` (${detail})` : ''));
+    if (res.status === 429) throw new Error('Rate limit reached. Wait a minute, or switch provider in AI settings.');
+    if (res.status === 404) throw new Error(`Model "${c.model}" was not found. Change the model name in AI settings.`);
+    throw new Error(`The AI service returned an error (${res.status}). ${typeof detail === 'string' ? detail : ''}`);
+  }
+  const data = await res.json();
+  const msg = data.choices && data.choices[0] && data.choices[0].message;
+  const text = msg && (msg.content || msg.reasoning_content || '');
+  if (!text) throw new Error('The AI sent an empty answer. Try again.');
+  return text;
+}
+function parseList(text){
+  text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/```(?:json)?/gi, '');
+  const m = text.match(/\[[\s\S]*\]/);
+  let arr = null;
+  if (m) { try { arr = JSON.parse(m[0]) } catch(e) {} }
+  if (!Array.isArray(arr)) arr = text.split(/\n+/).map(l => l.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, '').replace(/^["']|["'],?$/g, ''));
+  return arr.map(x => (typeof x === 'string' ? x : (x && (x.word || x.text || x.sentence)) || '').trim()).filter(x => x && x.length < 200);
+}
+async function generateWords(){
+  const btn = $('aiGo');
+  const topic = $('aiTopic').value === 'custom' ? ($('aiCustom').value.trim() || 'general English') : $('aiTopic').value;
+  const n = Number($('aiCount').value), level = $('aiLevel').value, sent = unit === 'sentence';
+  const seen = getSeen();
+  const avoid = seen.slice(-300).join(', ');
+  const prompt = sent
+    ? `Write ${n} natural English sentences for dictation practice at CEFR ${level} level on the topic "${topic}". Each sentence is 7 to 16 words and contains at least one word that learners often misspell from hearing. Use British spelling. Avoid sentences built around these already-practised words: ${avoid || 'none'}.\nReturn ONLY a JSON array of strings.`
+    : `List ${n} English words or short fixed phrases for spelling dictation at CEFR ${level} level on the topic "${topic}". Choose words that are useful and easy to misspell from hearing (silent letters, double consonants, tricky vowels, -ible/-able, -ance/-ence). Mix lengths. Use British spelling. No proper names unless the topic needs them. Do NOT include any of these already-practised words: ${avoid || 'none'}.\nReturn ONLY a JSON array of strings, like ["word","word"].`;
+  btn.disabled = true;
+  aiStatus(`<span class="spin"></span> Asking ${PROVIDERS[aiProv.value].name} for ${n} new ${sent ? 'sentences' : 'words'}…`, 'wait');
+  try {
+    const text = await callLLM([
+      { role:'system', content:'You create vocabulary for English dictation and spelling practice. You always answer with a JSON array of strings and nothing else.' },
+      { role:'user', content: prompt }
+    ]);
+    const have = new Set(seen.map(s => s.toLowerCase()));
+    let items = parseList(text);
+    if (!sent) items = items.map(w => w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, ''));
+    const uniq = new Set();
+    items = items.filter(w => { const k = w.toLowerCase(); if (!w || uniq.has(k) || (!sent && have.has(k))) return false; uniq.add(k); return true }).slice(0, n);
+    if (!items.length) throw new Error('The AI only suggested words you have already practised. Try another topic or level, or clear the word history.');
+    src.value = items.join('\n'); markPreset(null); updateInfo();
+    aiStatus(`${items.length} new ${sent ? 'sentences' : 'words'} ready on “${esc(topic)}”.${$('aiAuto').checked ? '' : ' Press Start when you are ready.'}`, 'ok');
+    if ($('aiAuto').checked) startSession(parseItems(src.value));
+  } catch (e) {
+    aiStatus(esc(e.message), 'err');
+  } finally { btn.disabled = false }
+}
+$('aiGo').onclick = generateWords;
+$('aiTest').onclick = async () => {
+  aiStatus('<span class="spin"></span> Testing…', 'wait');
+  try { const t = await callLLM([{role:'user', content:'Reply with the single word: ready'}], {maxTokens: 20, timeout: 30000}); aiStatus(`Connected. The model replied: “${esc(t.trim().slice(0,40))}”`, 'ok') }
+  catch (e) { aiStatus(esc(e.message), 'err') }
+};
 
 /* --- controls --- */
 $('checkBtn').onclick = check;

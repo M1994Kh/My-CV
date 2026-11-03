@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3556e8"/>
+      <stop offset="1" stop-color="#1c34a8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- ruled lines of a notebook -->
+  <g stroke="#ffffff" stroke-opacity=".10" stroke-width="6">
+    <line x1="64" y1="150" x2="448" y2="150"/>
+    <line x1="64" y1="226" x2="448" y2="226"/>
+    <line x1="64" y1="302" x2="448" y2="302"/>
+  </g>
+  <!-- speaker -->
+  <path d="M104 196h44l58-48c8-6 18-1 18 9v170c0 10-10 15-18 9l-58-48h-44c-8 0-14-6-14-14v-64c0-8 6-14 14-14z" fill="#ffffff"/>
+  <!-- sound waves -->
+  <g fill="none" stroke="#ffffff" stroke-width="22" stroke-linecap="round">
+    <path d="M266 196a64 64 0 0 1 0 92"/>
+    <path d="M312 156a122 122 0 0 1 0 172" stroke-opacity=".75"/>
+  </g>
+  <!-- typing cursor -->
+  <rect x="374" y="148" width="24" height="188" rx="12" fill="#ffe266"/>
+  <!-- marker underline: the typed line -->
+  <rect x="90" y="378" width="308" height="30" rx="15" fill="#ffe266"/>
+</svg>
