@@ -1,7 +1,7 @@
 {
   "name": "IELTS Studio",
   "short_name": "IELTS Studio",
-  "description": "Dictation and IELTS Speaking practice with an AI examiner.",
+  "description": "A 30-day IELTS plan, dictation, lessons and speaking practice with an AI examiner.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

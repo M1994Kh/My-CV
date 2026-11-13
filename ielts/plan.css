@@ -1,0 +1,70 @@
+/* 30-Day Plan module. Uses the IELTS Studio tokens from index.html. */
+#planApp{display:flex;flex-direction:column;gap:20px}
+#planApp[hidden]{display:none!important}
+#planApp a.btn{text-decoration:none}
+#planApp .btn{line-height:1.2}
+#planApp .status:empty{display:none}
+.pl-days{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.pl-day{border:1px solid var(--rule);border-radius:12px;padding:10px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;gap:3px;min-width:0;background:var(--sheet)}
+.pl-day b{font:800 20px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.pl-day span{font:600 10.5px var(--f-mono);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-day em{font-style:normal;font:700 11px var(--f-mono);color:var(--cobalt)}
+.pl-day.today{border-color:var(--cobalt);box-shadow:0 0 0 2px var(--cobalt-soft)}
+.pl-day.done{background:var(--good-soft);border-color:var(--good)}
+.pl-day.done em{color:var(--good)}
+.pl-day.full em{color:var(--marker-ink);background:var(--marker);align-self:flex-start;padding:0 5px;border-radius:4px}
+.pl-shift{display:flex;align-items:center;gap:10px;font:700 12px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pl-shift::after{content:"";flex:1;height:1px;background:var(--rule)}
+.pl-task{border:1px solid var(--rule);border-radius:10px;padding:10px 12px;background:var(--paper);font-size:14.5px}
+.pl-task b{font-family:var(--f-display)}
+.pl-timer{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pl-clock{font:800 28px/1 var(--f-display);font-variant-numeric:tabular-nums;min-width:4.2ch}
+.pl-clock.over{color:var(--bad)}
+.pl-ans{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 10px}
+.pl-q{display:grid;grid-template-columns:26px 1fr 34px;gap:4px;align-items:center}
+.pl-q label{font:600 12.5px var(--f-mono);color:var(--muted);text-align:right}
+.pl-q input{font:15px var(--f-body);color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:7px;padding:6px 8px;width:100%;min-width:0}
+.pl-q button{border:1px solid var(--rule);background:var(--sheet);color:var(--muted);border-radius:7px;height:32px;cursor:pointer;font-weight:700}
+.pl-q button[aria-pressed="true"]{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.pl-q select{grid-column:2 / 4;font:13px var(--f-body);padding:4px 6px}
+.pl-sec{font:700 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--cobalt);grid-column:1 / -1;margin-top:6px}
+.pl-res{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.pl-essay{min-height:220px;font:15px/1.6 var(--f-body)}
+.pl-small{min-height:70px;font:14px/1.5 var(--f-body)}
+.pl-wc{font:600 12.5px var(--f-mono);color:var(--muted)}
+.pl-wc.ok{color:var(--good)}
+.pl-list{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:14.5px}
+.pl-tut{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px}
+.pl-tut div{border:1px solid var(--rule);border-radius:10px;padding:9px 11px}
+.pl-tut b{display:block;font-family:var(--f-display);font-size:16px}
+.pl-tut span{font-size:13.5px;color:var(--muted)}
+.pl-quiz{border:1px solid var(--rule);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--paper)}
+.pl-quiz p{margin:0;font-size:18px;line-height:1.5}
+.pl-quiz .gap{display:inline-block;min-width:70px;border-bottom:2px solid var(--cobalt)}
+.pl-fb{font-weight:700}
+.pl-fb.good{color:var(--good)} .pl-fb.bad{color:var(--bad)}
+.pl-meter{height:8px;border-radius:99px;background:var(--rule);overflow:hidden;flex:1;min-width:80px}
+.pl-meter i{display:block;height:100%;width:0;background:var(--good);transition:width .08s}
+.pl-take{border:1px solid var(--rule);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.pl-take audio{width:100%}
+.pl-log{border:1px solid var(--rule);border-radius:10px;padding:10px 12px;max-height:260px;overflow:auto;font-size:14.5px;display:flex;flex-direction:column;gap:6px;background:var(--paper)}
+.pl-log .ex{color:var(--cobalt)} .pl-log b{font:700 11px var(--f-mono);text-transform:uppercase;letter-spacing:.06em;margin-right:6px}
+.pl-rec{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--bad);animation:plblink 1s infinite}
+@keyframes plblink{50%{opacity:.25}}
+.pl-files{display:flex;flex-direction:column;gap:6px}
+.pl-file{display:flex;gap:8px;align-items:center;border:1px solid var(--rule);border-radius:9px;padding:6px 10px;font-size:14px}
+.pl-file span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-view iframe{width:100%;height:72vh;border:1px solid var(--rule);border-radius:10px;background:#fff}
+.pl-view audio{width:100%}
+.pl-report{border:1px solid var(--rule);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.pl-report h3{margin:0;font:700 17px var(--f-display)}
+.pl-num{font:15px var(--f-body);color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:8px 10px;width:110px}
+details.pl-d>summary{cursor:pointer;font-weight:700}
+details.pl-d[open]>summary{margin-bottom:10px}
+@media (max-width:520px){
+  .sheet{padding:16px}
+  .pl-ans{grid-template-columns:1fr 1fr}
+  .pl-quiz p{font-size:17px}
+  .pl-view iframe{height:60vh}
+}
+@media (prefers-reduced-motion:reduce){.pl-rec{animation:none}}

@@ -401,6 +401,7 @@ body.drilling .study{padding:0}
 @media (max-width:520px){.fa{font-size:15px}.lcard{padding:12px 13px}.llist a{gap:4px 10px;padding:11px 12px}}
 @media print{.tabs,header,.lhead,.lfoot{display:none!important}body{background:none}.sheet{box-shadow:none;border:0}}
 </style>
+<link rel="stylesheet" href="plan.css">
 </head>
 <body>
 
@@ -417,6 +418,7 @@ body.drilling .study{padding:0}
 
   <nav class="tabs" id="tabs" aria-label="Modules">
     <a href="#home" class="tab" data-tab="home" aria-current="page">Home</a>
+    <a href="#plan" class="tab" data-tab="plan">30-Day Plan</a>
     <a href="#dictation" class="tab" data-tab="dictation">Dictation</a>
     <a href="#listening" class="tab" data-tab="listening">Listening</a>
     <a href="#reading" class="tab" data-tab="reading">Reading</a>
@@ -470,6 +472,9 @@ body.drilling .study{padding:0}
       <p class="meta lsrc" id="lsSrc"></p>
     </section>
   </div>
+
+  <!-- 30-DAY PLAN (plan.js) -->
+  <div id="planApp" class="appview" hidden></div>
 
   <!-- SETTINGS -->
   <div id="optApp" class="appview" hidden>
@@ -2419,10 +2424,11 @@ renderHistory();
 showSpk('home');
 
 /* ---------- App shell: routing, home dashboard, settings ---------- */
-const VIEWS = { home: 'homeApp', dictation: 'dictApp', speaking: 'spkApp', options: 'optApp', listening: 'learnApp', reading: 'learnApp', writing: 'learnApp' };
+const VIEWS = { home: 'homeApp', plan: 'planApp', dictation: 'dictApp', speaking: 'spkApp', options: 'optApp', listening: 'learnApp', reading: 'learnApp', writing: 'learnApp' };
 const SUBS = {
   home: 'Your IELTS practice desk. Train spelling by ear, sit speaking tests with an AI examiner, and track your bands.',
   dictation: 'Listen, type what you hear, and move on only when the spelling is right. Every word you miss comes back at the end for a second lesson.',
+  plan: 'Thirty days to test day: a timed Cambridge IELTS assessment every morning, two units of collocations every afternoon, and a report of your weak points each evening.',
   speaking: 'A speaking examiner that asks real IELTS-style questions, records you, and marks your answers with a full band-score report.',
   options: 'One AI engine and one set of keys for every module. Everything is stored only in this browser.',
   listening: 'Nine Persian masterclass lessons: the 30-second preview, spelling and numbers, maps, diagrams, and the Part 3 and Part 4 traps.',
@@ -2443,6 +2449,7 @@ function route(){
   if (learnMod && exam) stopExam(true);
   if (t !== 'dictation') { document.body.classList.remove('drilling'); if (synth && !exam) synth.cancel() }
   if (t === 'speaking' && !learnMod) { aiInfo(); engineNote(); renderHistory() }
+  if (window.Plan) { if (t === 'plan') Plan.show(parts); else Plan.leave() }
   if (t === 'home') renderHome();
   if (t === 'options') { loadProv(); showSeen(); showBank() }
   if (learnMod) openLearn(learnMod, learnMod === 'speaking' ? parts[2] : parts[1]);
@@ -2451,6 +2458,7 @@ function route(){
 window.addEventListener('hashchange', route);
 
 const GLYPH = {
+  plan: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M8 15l2.5 2.5L16 13"/></svg>',
   dictation: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 19h3"/></svg>',
   speaking: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4M8 21h8"/></svg>',
   grammar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>',
@@ -2467,6 +2475,7 @@ function renderHome(){
   chip.className = 'aichip ' + (keyOK ? 'ok' : 'no');
   chip.textContent = keyOK ? `AI ready · ${aiProv.value === 'gemini' ? (c.model || GEM_DEFAULT) : PROVIDERS[aiProv.value].name}` : 'AI: add your key in Settings';
   const live = [
+    ['plan', '30-Day Plan', 'Morning Cambridge assessments, afternoon collocations, and a daily PDF report of your weaknesses.', window.Plan ? Plan.stat() : 'Set up your 30 days'],
     ['dictation', 'Dictation', 'Hear words or sentences, type them, and re-learn every misspelling.', seen ? `${seen} words practised · ${trouble} trouble words` : 'Start with a ready list or AI words'],
     ['speaking', 'Speaking', 'A full IELTS speaking test with an examiner, recording, transcript and band report.', last ? `Last band ${Number(last.report.overall).toFixed(1)} · ${hist.length} ${hist.length === 1 ? 'test' : 'tests'}` : `${allCards().length} flashcards ready`]
   ];
@@ -2587,8 +2596,11 @@ $('aiThink').value = store.get('aiThink', 'medium'); $('aiThink').onchange = () 
 $('groqKey').value = provCfg('groq').key; $('groqKey').onchange = () => { const s = store.get('ai:groq', {}); store.set('ai:groq', { ...s, key: $('groqKey').value.trim() }); if (aiProv.value === 'groq') loadProv(); engineNote() };
 $('histClear').onclick = () => { store.set('spkHist', []); renderHistory(); optStatus('Speaking reports cleared.', 'ok') };
 $('cardsClear').onclick = () => { store.set('spkDeck', []); renderDeck(); optStatus('AI-made and custom flashcards removed. The built-in deck is still there.', 'ok') };
+window.IS = { $, store, esc, gemini, provCfg, ensureMic, micLevel, releaseMic, mic, parseObj, pickMime, blobToB64, fmt, GEM_BASE, route };
 route();
 })();
 </script>
+<script src="plan-data.js"></script>
+<script src="plan.js"></script>
 </body>
 </html>
