@@ -135,12 +135,12 @@ function stopAllTimers() { Object.keys(timers).forEach(stopTimer) }
 let view = { name: 'home', n: 0 };
 function setupHTML() {
   const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-  const pick = new Set(store.get('planBooksDraft', [16, 17, 18, 19]));
+  const pick = new Set(store.get('planBooksDraft', [18, 19, 20, 21]));
   return `<section class="sheet"><div><div class="eyebrow">30-Day Plan · set-up</div><h2>Build your 30 days</h2></div>
   <p class="meta" style="margin:0">Mornings are for a timed Cambridge IELTS assessment, because your real test is in the morning. Afternoons are for two units of English Collocations in Use. Days 1–20 test one skill a day; days 21–30 are full four-skill tests.</p>
   <div class="grid"><div class="field"><label for="plStart">Day 1 is</label><input type="date" class="txtin" id="plStart" value="${iso(tomorrow)}"></div></div>
   <div class="field"><label>Which Cambridge IELTS Academic books do you have? <span class="meta">Fifteen tests are needed, so pick four or more.</span></label>
-  <div class="presets" id="plBookPick">${Array.from({ length: 17 }, (_, i) => i + 4).map(b => `<button type="button" class="chip" data-act="pickBook" data-b="${b}" aria-pressed="${pick.has(b)}">${b}</button>`).join('')}</div></div>
+  <div class="presets" id="plBookPick">${Array.from({ length: 18 }, (_, i) => i + 4).map(b => `<button type="button" class="chip" data-act="pickBook" data-b="${b}" aria-pressed="${pick.has(b)}">${b}</button>`).join('')}</div></div>
   <div class="row"><button type="button" class="btn btn-primary" data-act="create">Create my plan</button><label class="btn btn-ghost" style="cursor:pointer">Restore a backup<input type="file" id="plRestore" accept=".json,application/json" hidden></label><span class="status" id="plSetupSt" role="status"></span></div></section>`;
 }
 function tagOf(p) { return p.kind === 'full' ? 'FULL TEST' : SK[p.skills[0]] }
