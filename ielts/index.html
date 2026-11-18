@@ -2283,7 +2283,7 @@ async function gemini({ system, input, schema, thinking, maxTokens = 8192, timeo
   };
   const mkLegacy = m => {
     const blocks = typeof input === 'string' ? [{ type: 'text', text: input }] : input;
-    const body = { contents: [{ role: 'user', parts: blocks.map(b => b.type === 'audio' ? { inline_data: { mime_type: b.mime_type, data: b.data } } : { text: b.text }) }],
+    const body = { contents: [{ role: 'user', parts: blocks.map(b => (b.type === 'audio' || b.type === 'image') ? { inline_data: { mime_type: b.mime_type, data: b.data } } : { text: b.text }) }],
       generationConfig: { maxOutputTokens: maxTokens, thinkingConfig: { thinkingLevel: think } } };
     if (system) body.systemInstruction = { parts: [{ text: system }] };
     if (schema) body.generationConfig.responseMimeType = 'application/json';

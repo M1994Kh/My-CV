@@ -54,7 +54,7 @@ function buildReport(n) {
   if (c && c.total) lines.push(`Collocations (Units ${p.co.units.join(' and ')}): ${c.score}/${c.total}`);
   const got = Object.values(bands);
   const overall = ['L', 'R', 'W', 'S'].every(k => bands[k] != null) ? half(got.reduce((a, b) => a + b, 0) / 4) : null;
-  return { n, date: iso(dayDate(n)), kind: p.kind, test: testName(p.t), skills: p.skills, units: p.co.units, topic: p.co.topic, bands, overall, lines, weak,
+  return { n, date: iso(dayDate(n)), kind: d.simKind || p.kind, test: d.simTitle || testName(p.t), skills: d.simSkills || p.skills, units: p.co.units, topic: p.co.topic, bands, overall, lines, weak,
     missed: (c && c.missed) || [], fixes: [].concat((d.W && d.W.fixes) || [], (d.S && d.S.fixes) || []), notes: d.notes || '', made: Date.now() };
 }
 function focusFor(n) {
@@ -97,8 +97,8 @@ async function reportPDF(r) {
 
 /* ---------- local book library (IndexedDB on this device only) ---------- */
 const mem = new Map();
-function idb() { return new Promise((res, rej) => { const q = indexedDB.open('ielts-books', 1); q.onupgradeneeded = () => q.result.createObjectStore('files', { keyPath: 'name' }); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error) }) }
-async function tx(mode, fn) { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('files', mode), q = fn(t.objectStore('files')); t.oncomplete = () => res(q && q.result); t.onerror = t.onabort = () => rej(t.error) }) }
+function idb() { return new Promise((res, rej) => { const q = indexedDB.open('ielts-books', 2); q.onupgradeneeded = () => { const db = q.result; if (!db.objectStoreNames.contains('files')) db.createObjectStore('files', { keyPath: 'name' }); if (!db.objectStoreNames.contains('packs')) db.createObjectStore('packs', { keyPath: 'id' }) }; q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error) }) }
+async function tx(mode, fn, store = 'files') { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction(store, mode), q = fn(t.objectStore(store)); t.oncomplete = () => res(q && q.result); t.onerror = t.onabort = () => rej(t.error) }) }
 async function bookList() { let saved = []; try { saved = await tx('readonly', s => s.getAll()) || [] } catch (e) {} const names = new Set(saved.map(f => f.name)); return saved.concat([...mem.values()].filter(f => !names.has(f.name))).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })) }
 async function bookAdd(files) { let kept = 0, temp = 0; for (const f of files) { const item = { name: f.name, type: f.type, size: f.size, blob: f }; try { await tx('readwrite', s => s.put(item)); kept++ } catch (e) { mem.set(f.name, item); temp++ } } return { kept, temp } }
 async function bookDel(name) { mem.delete(name); try { await tx('readwrite', s => s.delete(name)) } catch (e) {} }
@@ -154,6 +154,7 @@ function homeHTML() {
   <div class="pl-shift">Afternoon</div><div class="pl-task"><b>Collocations Units ${p.co.units.join(' and ')}</b> · ${esc(p.co.topic)}</div>
   ${f.length ? `<div><div class="eyebrow">Focus from your last reports</div><ul class="pl-list" style="margin-top:6px">${f.map(x => `<li>${esc(x.text)}${x.count > 1 ? ` <span class="meta">×${x.count}</span>` : ''}</li>`).join('')}</ul></div>` : ''}
   <div class="row"><a class="btn btn-primary" href="#plan/day/${cur}">Open Day ${cur}</a><a class="btn btn-ghost" href="#plan/reports">Reports</a></div></section>
+  ${packsHTML()}
   <section class="sheet"><div><div class="eyebrow">Calendar</div><h2>All 30 days</h2></div>
   <div class="pl-days">${Array.from({ length: 30 }, (_, i) => { const n = i + 1, q = dayPlan(n); return `<a class="pl-day${n === t ? ' today' : ''}${dayDone(n) ? ' done' : ''}${q.kind === 'full' ? ' full' : ''}" href="#plan/day/${n}"><b>${n}</b><span>${nice(dayDate(n))}</span><em>${dayDone(n) ? '✓ ' : ''}${q.kind === 'full' ? 'Full' : SK[q.skills[0]]}</em><span>C${q.t.book}·T${q.t.test} U${q.co.units.join('–')}</span></a>` }).join('')}</div></section>
   <section class="sheet"><div><div class="eyebrow">Plan settings</div><h2>Books and backup</h2></div>
@@ -255,6 +256,7 @@ function dayHTML(n) {
   <p class="meta" style="margin:0">${p.kind === 'full' ? 'Sit it like the real morning: start at 9:00, Listening → Reading → Writing with no breaks (about 2 h 40), then Speaking.' : 'Start at 9:00, the time of your real test. One timed section, marked the same morning.'} Collocations after lunch.</p>
   ${f.length ? `<div><div class="eyebrow">Watch for these today</div><ul class="pl-list" style="margin-top:6px">${f.map(x => `<li>${esc(x.text)}${x.count > 1 ? ` <span class="meta">×${x.count}</span>` : ''}</li>`).join('')}</ul></div>` : ''}
   <div class="row"><a class="btn btn-ghost" href="#plan/day/${clampDay(n - 1)}"${n === 1 ? ' hidden' : ''}>← Day ${n - 1}</a><a class="btn btn-ghost" href="#plan/day/${clampDay(n + 1)}"${n === 30 ? ' hidden' : ''}>Day ${n + 1} →</a></div></section>
+  ${packsHTML()}
   ${booksHTML()}
   ${p.skills.map(k => k === 'W' ? wHTML(n, p) : k === 'S' ? sHTML(n, p) : lrHTML(n, k, p)).join('')}
   ${cHTML(n, p)}
@@ -264,10 +266,12 @@ function dayHTML(n) {
   <div id="plReport">${d.report ? reportHTML(d.report) : ''}</div></section>`;
 }
 function render() {
-  stopAllTimers(); liveStop(true); recAbort(); quiz = null;
+  stopAllTimers(); liveStop(true); recAbort(); quiz = null; simStop();
   if (!P) { root.innerHTML = setupHTML(); return }
+  if (view.name === 'sim') { renderSim(); return }
   root.innerHTML = view.name === 'day' ? dayHTML(view.n) : view.name === 'reports' ? reportsHTML() : homeHTML();
-  if (view.name === 'day') renderBooks();
+  if (view.name === 'day') { renderBooks(); fillPacks(view.n) }
+  if (view.name === 'home') fillPacks(clampDay(todayN()));
 }
 
 /* ---------- collocation practice ---------- */
@@ -316,7 +320,9 @@ async function markW() {
   if (wc(r.t1) + wc(r.t2) < 50) { st.className = 'status err'; st.textContent = 'Write your answers first.'; return }
   st.className = 'status wait'; st.textContent = 'Gemini is marking your writing…';
   try {
-    const out = await IS.gemini({ system: W_SYS, input: wText(r), schema: W_SCHEMA, onStatus: t => st.textContent = t });
+    let input = wText(r);
+    if (r.pack) { const pk = await packGet(r.pack), img = pk && writingPrompts(pk.html).img, m = img && img.match(/^data:(image\/[\w+.-]+);base64,(.+)$/); if (m) input = [{ type: 'text', text: input + '\n\nThe Task 1 visual is attached as an image.' }, { type: 'image', data: m[2], mime_type: m[1] }] }
+    const out = await IS.gemini({ system: W_SYS, input, schema: W_SCHEMA, onStatus: t => st.textContent = t });
     const j = IS.parseObj(out.text); if (!j) throw new Error('Gemini’s answer could not be read. Try again.');
     Object.assign(r, { band: half(j.overall), crit: { 'Task 1': j.task1 && j.task1.band, 'Task 2': j.task2 && j.task2.band, 'Coherence': j.task2 && j.task2.coherence, 'Lexical': j.task2 && j.task2.lexical, 'Grammar': j.task2 && j.task2.grammar }, weak: (j.weaknesses || []).slice(0, 6), fixes: (j.fixes || []).slice(0, 5) });
     rec(view.n).W = r; save(); $('res_W').innerHTML = aiResult(r); st.className = 'status ok'; st.textContent = `Marked by ${out.model}.`;
@@ -469,6 +475,187 @@ async function liveStop(silent, err) {
   else if (!err) { st.className = 'status'; st.textContent = 'Test ended.' }
 }
 
+
+/* ---------- exam simulator: test packs kept on this device ---------- */
+async function packList() { try { return (await tx('readonly', s => s.getAll(), 'packs')) || [] } catch (e) { return [] } }
+async function packGet(id) { try { return await tx('readonly', s => s.get(id), 'packs') } catch (e) { return null } }
+async function packDel(id) { try { await tx('readwrite', s => s.delete(id), 'packs') } catch (e) {} }
+const relOf = f => f.webkitRelativePath || f.name;
+async function importPacks(files) {
+  files = [...files];
+  const jsons = files.filter(f => /(^|\/)pack\.json$/i.test(relOf(f)));
+  if (!jsons.length) throw new Error('No pack.json was found. Choose the Simulator folder, or one Cambridge-21-Test folder.');
+  const done = [];
+  for (const j of jsons) {
+    const rel = relOf(j), dir = rel.includes('/') ? rel.slice(0, rel.lastIndexOf('/') + 1) : '';
+    const mine = files.filter(f => { const r = relOf(f); return dir ? r.startsWith(dir) && !r.slice(dir.length).includes('/') : true });
+    const byName = Object.fromEntries(mine.map(f => [f.name.toLowerCase(), f]));
+    let m; try { m = JSON.parse(await j.text()) } catch (e) { throw new Error('A pack.json file could not be read.') }
+    if (!m || m.app !== 'ielts-studio-pack' || !m.id || !m.key) throw new Error('That pack.json is not an IELTS Studio test pack.');
+    const hf = byName[String(m.html || 'test.html').toLowerCase()];
+    if (!hf) throw new Error(`${m.title}: test.html is missing.`);
+    const audio = {}, missing = [];
+    Object.entries(m.audio || {}).forEach(([p, names]) => { audio[p] = names.map(n => byName[n.toLowerCase()] || (missing.push(n), null)).filter(Boolean) });
+    if (missing.length) throw new Error(`${m.title}: these audio files are missing: ${missing.join(', ')}.`);
+    const pack = { id: m.id, title: m.title, book: m.book, test: m.test, key: m.key, pairs: m.pairs || {}, html: await hf.text(), audio, added: Date.now() };
+    try { await tx('readwrite', s => s.put(pack), 'packs') } catch (e) { throw new Error('This browser has no room to keep the test audio. Free some space or use Chrome or Edge.') }
+    done.push(pack.title);
+  }
+  return done;
+}
+function chunk(html, h) {
+  const tag = `<h2>${h}</h2>`, a = html.indexOf(tag); if (a < 0) return '';
+  const rest = html.slice(a + tag.length), b = rest.search(/<h2>|<\/section>/);
+  return b < 0 ? rest : rest.slice(0, b);
+}
+function paperDoc(html, h) {
+  const css = (html.match(/<style[\s\S]*?<\/style>/gi) || []).join('');
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${css}<style>nav{display:none!important}body{margin:0;background:#fff}.container{padding:8px 14px 60px;max-width:none}section.module{border:0;box-shadow:none;padding:4px;margin:0}img{max-width:100%;height:auto}h2{margin-top:4px}</style></head><body><div class="container"><section class="module"><h2>${h}</h2>${chunk(html, h)}</section></div></body></html>`;
+}
+const docOf = (html, h) => new DOMParser().parseFromString(chunk(html, h), 'text/html');
+const clean = t => String(t || '').replace(/\s+/g, ' ').trim();
+function speakingText(html) { return [...docOf(html, 'SPEAKING').body.querySelectorAll('h3,h4,p,li')].map(e => (e.tagName === 'LI' ? '- ' : '') + clean(e.textContent)).filter(x => x && x !== '-').join('\n') }
+function writingPrompts(html) { const d = docOf(html, 'WRITING'); const p = [...d.querySelectorAll('.task-prompt')].map(e => clean(e.textContent)); return { p1: p[0] || '', p2: p[1] || '', img: (d.querySelector('img') || { getAttribute: () => '' }).getAttribute('src') || '' } }
+const nrm = v => String(v || '').toLowerCase().replace(/[£$€]/g, '').replace(/[‘’`]/g, "'").replace(/[-‐-―]/g, ' ').replace(/[.,;:!?"]+$/g, '').replace(/\s+/g, ' ').trim();
+const TF = ['TRUE', 'FALSE'], YN = ['YES', 'NO'], LETTERS = 'ABCDEFGHIJ'.split('');
+function qKind(key, q) {
+  const a = String(key[q][0]).toUpperCase();
+  if (TF.includes(a)) return 'tf'; if (YN.includes(a)) return 'yn';
+  if (a === 'NOT GIVEN') { for (let d = 1; d < 8; d++) for (const x of [q - d, q + d]) { const v = key[x] && String(key[x][0]).toUpperCase(); if (TF.includes(v)) return 'tf'; if (YN.includes(v)) return 'yn' } return 'tf' }
+  return /^[A-J]$/.test(a) ? 'letter' : 'text';
+}
+let sim = null;
+function simStopMedia() { if (!sim) return; clearInterval(sim.iv); sim.iv = null; if (sim.au) { try { sim.au.pause() } catch (e) {} sim.au.onended = sim.au.onerror = null; sim.au = null } (sim.urls || []).forEach(u => URL.revokeObjectURL(u)); sim.urls = [] }
+function simStop() { simStopMedia(); sim = null; document.body.classList.remove('plan-wide') }
+const simSt = (t, k) => { const e = $('simSt'); if (e) { e.className = 'status ' + (k || ''); e.textContent = t } };
+const nextBtn = (label, dis) => { const b = $('simNext'); if (b) { b.textContent = label; b.disabled = !!dis } };
+function simAns(k) { const d = rec(sim.n); if (!d.sim || d.sim.pack !== sim.pk.id) d.sim = { pack: sim.pk.id, L: {}, R: {} }; return d.sim[k] }
+function countdown(secs, onEnd) {
+  const s = sim; clearInterval(s.iv); const end = Date.now() + secs * 1000;
+  const f = () => { if (sim !== s) return clearInterval(s.iv); s.left = Math.max(0, Math.round((end - Date.now()) / 1000)); const c = $('simClock'); if (c) { c.textContent = IS.fmt(s.left); c.classList.toggle('warn', s.left <= 300) } if (s.left <= 0) { clearInterval(s.iv); onEnd() } };
+  f(); s.iv = setInterval(f, 500);
+}
+async function renderSim() {
+  const id = view.pack, n = view.n;
+  root.innerHTML = '<section class="sheet"><p class="meta" style="margin:0">Opening the test…</p></section>';
+  const pk = await packGet(id);
+  if (view.name !== 'sim' || view.pack !== id) return;
+  if (!pk) { root.innerHTML = `<section class="sheet"><h2>This test pack is not on this device</h2><p class="meta" style="margin:0">Add it again from the Simulator folder.</p><div class="row"><a class="btn btn-ghost" href="#plan/day/${n}">← Day ${n}</a></div></section>`; return }
+  const p = dayPlan(n);
+  sim = { pk, n, mode: p.kind === 'single' ? p.skills[0] : 'full', strict: true, urls: [] };
+  document.body.classList.add('plan-wide');
+  simIntro();
+}
+function simIntro() {
+  const s = sim, modes = [['full', 'Full test'], ['L', 'Listening'], ['R', 'Reading'], ['W', 'Writing'], ['S', 'Speaking']];
+  root.innerHTML = `<section class="sheet"><div class="drillhead"><div><div class="eyebrow">Exam simulator · results go to Day ${s.n}</div><h2>${esc(s.pk.title)}</h2></div><a href="#plan/day/${s.n}" class="linkbtn">← Day ${s.n}</a></div>
+  <div class="field"><label>What to sit</label><div class="presets">${modes.map(([m, l]) => `<button type="button" class="chip" data-act="simMode" data-m="${m}" aria-pressed="${s.mode === m}">${l}</button>`).join('')}</div></div>
+  <ul class="pl-list"><li><b>Listening</b> · about 30 minutes; the recording plays once, then you get 2 minutes to check</li><li><b>Reading</b> · 60 minutes for three passages</li><li><b>Writing</b> · 60 minutes for Task 1 and Task 2</li><li><b>Speaking</b> · 11–14 minutes with the live examiner or the recorder</li></ul>
+  <label class="meta" style="display:flex;gap:8px;align-items:flex-start;font-weight:400"><input type="checkbox" id="simStrict"${s.strict ? ' checked' : ''}> Exam conditions: no pausing the recording, and each section ends when its time is up</label>
+  <p class="meta" style="margin:0">Use headphones and sit at a desk. In a full test the sections follow each other with no break, as on test day. Answers are saved as you type.</p>
+  <div class="row"><button type="button" class="btn btn-primary" data-act="simGo">Start</button></div></section>`;
+}
+function sheetHTML(k) {
+  const key = sim.pk.key[k], a = simAns(k);
+  return `<div class="sheet sim-ans">${D.sections[k].map(([name, f, t]) => `<div class="pl-sec">${name}</div><div class="sim-qs">${Array.from({ length: t - f + 1 }, (_, i) => {
+    const q = f + i, v = a[q] || '', kind = qKind(key, q), id = `sa_${q}`;
+    const opts = kind === 'tf' ? ['TRUE', 'FALSE', 'NOT GIVEN'] : kind === 'yn' ? ['YES', 'NO', 'NOT GIVEN'] : kind === 'letter' ? LETTERS : null;
+    const ctl = opts ? `<select id="${id}" data-sa="${k}" data-q="${q}"><option value=""></option>${opts.map(o => `<option${o === v ? ' selected' : ''}>${o}</option>`).join('')}</select>`
+      : `<input id="${id}" data-sa="${k}" data-q="${q}" value="${esc(v)}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">`;
+    return `<div class="sim-q"><label for="${id}">${q}</label>${ctl}</div>` }).join('')}</div>`).join('')}</div>`;
+}
+function wSheet() {
+  const r = rec(sim.n).W || {};
+  return ['1', '2'].map(i => { const tg = i === '1' ? 150 : 250; return `<div class="sheet" style="gap:8px"><div class="drillhead"><b>Task ${i}</b><span class="pl-wc${wc(r['t' + i]) >= tg ? ' ok' : ''}" id="wc${i}" data-target="${tg}">${wc(r['t' + i])} words</span></div><textarea class="pl-essay" data-w="t${i}" spellcheck="false" placeholder="Write Task ${i} here (at least ${tg} words)">${esc(r['t' + i] || '')}</textarea></div>` }).join('');
+}
+function simStep() {
+  const s = sim; simStopMedia(); s.started = s.playing = false;
+  const k = s.order[s.i]; if (!k) return simResults();
+  const d = rec(s.n);
+  let sheet = '';
+  if (k === 'L' || k === 'R') sheet = sheetHTML(k);
+  else if (k === 'W') { if (!d.W || d.W.pack !== s.pk.id) { const w = writingPrompts(s.pk.html); d.W = { pack: s.pk.id, p1: w.p1, p2: w.p2 } } save(); sheet = wSheet() }
+  else { d.S = d.S || {}; if (d.S.qPack !== s.pk.id) { d.S.q = speakingText(s.pk.html); d.S.qPack = s.pk.id } save(); sheet = sHTML(s.n, dayPlan(s.n)) }
+  const label = k === 'L' ? '▶ Start Listening' : k === 'S' ? 'Finish test →' : `Submit ${SK[k]} →`;
+  root.innerHTML = `<section class="sheet sim-bar"><div class="row"><div style="flex:1;min-width:0"><div class="eyebrow">${esc(s.pk.title)}${s.order.length > 1 ? ` · Section ${s.i + 1} of ${s.order.length}` : ''}</div><h2>${SK[k]}</h2></div><span class="pl-clock" id="simClock"${k === 'S' ? ' hidden' : ''}>${k === 'R' || k === 'W' ? '60:00' : '0:00'}</span><button type="button" class="btn btn-ghost" data-act="simPause" id="simPause" hidden>Pause</button><button type="button" class="btn btn-primary" data-act="simNext" id="simNext">${label}</button></div>
+  <div class="status" id="simSt" role="status"></div>
+  <div class="seg sim-tabs" id="simTabs"><button type="button" data-act="simTab" data-t="paper" aria-pressed="true">Question paper</button><button type="button" data-act="simTab" data-t="sheet" aria-pressed="false">${k === 'L' || k === 'R' ? 'Answer sheet' : 'Your answers'}</button></div></section>
+  <div class="sim-grid" id="simGrid" data-show="paper"><div class="sim-paper"><iframe id="simPaper" sandbox="allow-same-origin" title="Question paper"></iframe></div><div class="sim-sheet">${sheet}</div></div>`;
+  $('simPaper').srcdoc = paperDoc(s.pk.html, SKILL_H[k]);
+  window.scrollTo(0, 0);
+  if (k === 'L') simSt(s.strict ? 'Look at Part 1 now. Press Start when you are ready: the recording plays once and does not stop.' : 'Practice mode: you can pause the recording.');
+  if (k === 'R' || k === 'W') countdown(3600, () => { if (s.strict) { simSt('Time is up.', 'err'); simFinish(k) } else simSt('Time is up. Finish your answer, then submit.', 'err') });
+  if (k === 'S') { renderTakes(); simSt('Start the live examiner or the recorder under “Your answers”. This test’s Speaking questions are already loaded for the examiner.') }
+}
+const SKILL_H = { L: 'LISTENING', R: 'READING', W: 'WRITING', S: 'SPEAKING' };
+function scrollPaper(i) { try { const d = $('simPaper').contentDocument, h = d && d.querySelectorAll('h3')[i]; if (h) h.scrollIntoView({ block: 'start', behavior: 'smooth' }) } catch (e) {} }
+function listenStart() {
+  const s = sim;
+  if (!s.seq) { s.seq = []; Object.keys(s.pk.audio).sort((a, b) => a - b).forEach(p => s.pk.audio[p].forEach((b, j) => s.seq.push({ p: +p, b, first: j === 0 }))); s.si = 0; s.doneSecs = 0 }
+  if (!s.seq.length) return simSt('This test pack has no audio.', 'err');
+  s.au = s.au || new Audio(); s.au.preload = 'auto';
+  s.au.onended = () => { s.doneSecs += s.au.duration || 0; playSeg(s.si + 1) };
+  s.au.onerror = () => simSt('This audio file could not be played. Try Chrome or Edge.', 'err');
+  s.started = s.playing = true;
+  nextBtn(s.strict ? 'Listening…' : 'Submit Listening →', s.strict);
+  const pb = $('simPause'); if (pb) pb.hidden = s.strict;
+  clearInterval(s.iv); s.iv = setInterval(() => { const c = $('simClock'); if (c && s.au) c.textContent = IS.fmt(s.doneSecs + (s.au.currentTime || 0)) }, 500);
+  playSeg(s.si || 0);
+}
+function playSeg(i) {
+  const s = sim; if (!s || !s.au) return;
+  if (i >= s.seq.length) {
+    s.playing = false; clearInterval(s.iv); const pb = $('simPause'); if (pb) pb.hidden = true;
+    nextBtn('Submit Listening →', false); simSt('The recording has finished. You have 2 minutes to check your answers.');
+    countdown(120, () => { if (s.strict) simFinish('L'); else simSt('Checking time is over. Submit when you are ready.') });
+    return;
+  }
+  const seg = s.seq[i]; s.si = i;
+  const url = URL.createObjectURL(seg.b); s.urls.push(url); s.au.src = url;
+  const pr = s.au.play(); if (pr && pr.catch) pr.catch(() => { s.started = false; nextBtn('▶ Continue', false); simSt('The browser stopped the audio. Press Continue.', 'err') });
+  if (seg.first) { scrollPaper(seg.p - 1); simSt(`Part ${seg.p} of 4 is playing.`) }
+}
+function simScore(k) {
+  const s = sim, key = s.pk.key[k], a = simAns(k), ok = {};
+  for (let q = 1; q <= 40; q++) ok[q] = !!a[q] && key[q].some(x => nrm(x) === nrm(a[q]));
+  ((s.pk.pairs || {})[k] || []).forEach(([x, y]) => { const want = [key[x][0], key[y][0]].map(nrm), used = new Set(); [x, y].forEach(q => { const j = want.findIndex((w, wi) => !used.has(wi) && w === nrm(a[q])); ok[q] = !!a[q] && j >= 0; if (j >= 0) used.add(j) }) });
+  const r = rec(s.n)[k] = rec(s.n)[k] || {}, answers = [], wrong = [];
+  for (let q = 1; q <= 40; q++) { answers[q] = a[q] || ''; if (!ok[q]) wrong.push(q) }
+  const keepCauses = r.sim === s.pk.id ? (r.causes || {}) : {};
+  Object.assign(r, { answers, wrong, causes: keepCauses, raw: 40 - wrong.length, band: bandFor(k, 40 - wrong.length), sim: s.pk.id });
+  save();
+}
+function simFinish(k) { const s = sim; if (!s) return; if (k === 'L' || k === 'R') simScore(k); s.i++; simStep() }
+function reviewHTML(k) {
+  const s = sim, r = rec(s.n)[k], key = s.pk.key[k];
+  const rows = (r.wrong || []).map(q => `<div class="sim-rev"><b>${q}</b><span><span class="meta">You:</span> ${r.answers[q] ? esc(r.answers[q]) : '<span class="meta">(blank)</span>'}</span><span><span class="meta">Answer:</span> <b>${esc(key[q].slice(0, 2).join(' / '))}</b></span><select data-cause="${k}" data-q="${q}" aria-label="Why question ${q} was wrong"><option value="">Why was it wrong?</option>${D.causes[k].map(c => `<option${(r.causes || {})[q] === c ? ' selected' : ''}>${c}</option>`).join('')}</select></div>`).join('');
+  return `<section class="sheet"><div><div class="eyebrow">${SK[k]} · marked automatically</div><h2>${r.raw}/40 · band ${r.band.toFixed(1)}</h2></div>${lrResult(k, r)}
+  ${rows ? `<div><div class="eyebrow">Wrong or blank answers · choose why for each one</div>${rows}</div>` : '<p class="pl-fb good" style="margin:0">All 40 correct.</p>'}
+  <details class="pl-d" data-paper="${k}"><summary>Look at the question paper again</summary><iframe class="sim-rev-paper" sandbox="allow-same-origin" title="${SK[k]} question paper"></iframe></details></section>`;
+}
+function simResults() {
+  const s = sim; simStopMedia(); const d = rec(s.n);
+  P.packUsed = P.packUsed || {}; P.packUsed[s.pk.id] = s.n; save();
+  const parts = s.order.map(k => {
+    if (k === 'L' || k === 'R') return reviewHTML(k);
+    if (k === 'W') { const r = d.W || {}; return `<section class="sheet" id="sk_W"><div><div class="eyebrow">Writing</div><h2>Task 1: ${wc(r.t1)} words · Task 2: ${wc(r.t2)} words</h2></div><div class="row"><button type="button" class="btn btn-primary" data-act="markW">Mark with Gemini</button><button type="button" class="btn btn-ghost" data-act="copyW">Copy for another AI</button><span class="status" id="wSt" role="status"></span></div><div id="res_W">${aiResult(r)}</div>${manualHTML('W', r)}</section>` }
+    const r = d.S || {}; return `<section class="sheet"><div><div class="eyebrow">Speaking</div><h2>${r.band != null ? 'Band ' + Number(r.band).toFixed(1) : 'Not marked yet'}</h2></div><div id="res_S">${aiResult(r)}</div>${manualHTML('S', r)}</section>`;
+  }).join('');
+  root.innerHTML = `<section class="sheet"><div class="drillhead"><div><div class="eyebrow">Results · Day ${s.n}</div><h2>${esc(s.pk.title)}</h2></div><a href="#plan/day/${s.n}" class="linkbtn">← Day ${s.n}</a></div><p class="meta" style="margin:0">Bands for Listening and Reading use the usual Academic conversion and are approximate.</p></section>
+  ${parts}
+  <section class="sheet"><div><div class="eyebrow">End of day</div><h2>Daily report</h2></div><textarea class="pl-small" id="plNotes" placeholder="Anything else to remember tomorrow (optional)">${esc(d.notes || '')}</textarea><div class="row"><button type="button" class="btn btn-primary" data-act="finish">Build today’s report</button></div><div id="plReport">${d.report ? reportHTML(d.report) : ''}</div></section>`;
+  window.scrollTo(0, 0);
+}
+function packsHTML() { return '<section class="sheet" id="plPacks"><p class="meta" style="margin:0">Loading the exam simulator…</p></section>' }
+async function fillPacks(n) {
+  const list = (await packList()).sort((a, b) => a.book - b.book || a.test - b.test), el = $('plPacks'); if (!el) return;
+  const p = dayPlan(n), used = P.packUsed || {};
+  el.innerHTML = `<div><div class="eyebrow">Exam simulator</div><h2>Sit a real Cambridge test</h2></div>
+  <p class="meta" style="margin:0">Timed like the real exam, with the recording played once and automatic marking. Results go into Day ${n}’s report. Test packs stay on this device and are never uploaded.</p>
+  ${list.length ? `<div class="pl-files">${list.map(k => `<div class="pl-file"><span><b>${esc(k.title)}</b>${k.book === p.t.book && k.test === p.t.test ? ' <em class="pl-tag">today’s test</em>' : ''}${used[k.id] ? ` <span class="meta">· sat on Day ${used[k.id]}</span>` : ''}</span><a class="btn btn-primary" href="#plan/sim/${k.id}/${n}">Start</a><button type="button" class="linkbtn" data-act="packDel" data-id="${esc(k.id)}">Remove</button></div>`).join('')}</div>` : '<p class="meta" style="margin:0">No test packs yet. They are on your computer in <b>IELTS › Collocations › Simulator</b>.</p>'}
+  <div class="row"><label class="btn btn-ghost" style="cursor:pointer">＋ Add the Simulator folder<input type="file" id="plPackDir" webkitdirectory directory multiple hidden></label><label class="btn btn-ghost" style="cursor:pointer">＋ Add one pack’s files<input type="file" id="plPackIn" multiple hidden></label><span class="status" id="plPackSt" role="status"></span></div>`;
+}
+
 /* ---------- actions ---------- */
 const S_PROMPT = () => `${S_SYS.replace(' Reply in JSON only.', '')}\nI am attaching an MP3 of my IELTS Speaking practice test. Give me an overall band, a band for each of the four criteria, my main weaknesses with examples, and concrete fixes.${(rec(view.n).S || {}).q ? '\nQuestions I answered:\n' + rec(view.n).S.q : ''}`;
 const acts = {
@@ -527,13 +714,31 @@ const acts = {
   finish() { const n = view.n, d = rec(n); d.notes = $('plNotes').value.trim(); d.report = buildReport(n); save(); $('plReport').innerHTML = reportHTML(d.report); $('plReport').scrollIntoView({ block: 'nearest' }) },
   async pdf(b) { const n = +b.dataset.n, st = $('plPdfSt' + n); st.className = 'status wait'; st.textContent = 'Making the PDF…'; try { await reportPDF(P.days[n].report); st.className = 'status ok'; st.textContent = 'Saved to your downloads. Keep it with your other daily reports.' } catch (e) { st.className = 'status err'; st.textContent = e.message } },
   bookOpen(b) { openBook(b.dataset.name) },
+  async packDel(b) { if (!confirm('Remove this test pack from this browser? The files on your computer stay.')) return; await packDel(b.dataset.id); fillPacks(view.name === 'day' ? view.n : clampDay(todayN())) },
+  simMode(b) { sim.mode = b.dataset.m; root.querySelectorAll('[data-act="simMode"]').forEach(x => x.setAttribute('aria-pressed', String(x === b))) },
+  simGo() {
+    const s = sim; s.strict = $('simStrict').checked; s.order = s.mode === 'full' ? ['L', 'R', 'W', 'S'] : [s.mode]; s.i = 0; s.seq = null;
+    const d = rec(s.n); d.simTitle = s.pk.title; d.simKind = s.order.length === 4 ? 'full' : 'single'; d.simSkills = s.order.slice(); save();
+    simStep();
+  },
+  simNext() {
+    const s = sim; if (!s) return; const k = s.order[s.i];
+    if (k === 'L' && !s.started) return listenStart();
+    if (k === 'L' && s.playing && s.strict) return;
+    if (k === 'L' && s.playing && !confirm('Stop the recording and submit Listening now?')) return;
+    if ((k === 'R' || k === 'W') && s.left > 60 && !confirm(`Submit ${SK[k]} now? You still have ${IS.fmt(s.left)}.`)) return;
+    simFinish(k);
+  },
+  simPause(b) { const s = sim; if (!s || !s.au || s.strict) return; if (s.au.paused) { s.au.play(); b.textContent = 'Pause' } else { s.au.pause(); b.textContent = 'Resume' } },
+  simTab(b) { $('simGrid').dataset.show = b.dataset.t; root.querySelectorAll('[data-act="simTab"]').forEach(x => x.setAttribute('aria-pressed', String(x === b))) },
   async bookDel(b) { await bookDel(b.dataset.name); renderBooks() },
   bookClose() { const v = $('plView'); v.hidden = true; v.innerHTML = ''; if (viewURL) { URL.revokeObjectURL(viewURL); viewURL = null } }
 };
 root.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b && acts[b.dataset.act]) acts[b.dataset.act](b) });
 root.addEventListener('input', e => {
-  const t = e.target, n = view.n; if (!P || view.name !== 'day') return;
-  if (t.dataset.ans) { const r = rec(n)[t.dataset.ans] = rec(n)[t.dataset.ans] || {}; (r.answers = r.answers || [])[+t.dataset.q] = t.value; save() }
+  const t = e.target, n = view.n; if (!P || (view.name !== 'day' && view.name !== 'sim')) return;
+  if (t.dataset.sa && sim) { simAns(t.dataset.sa)[+t.dataset.q] = t.value.trim(); save() }
+  else if (t.dataset.ans) { const r = rec(n)[t.dataset.ans] = rec(n)[t.dataset.ans] || {}; (r.answers = r.answers || [])[+t.dataset.q] = t.value; save() }
   else if (t.dataset.w) { const r = rec(n).W = rec(n).W || {}; r[t.dataset.w] = t.value; save(); const i = t.dataset.w[1], el = t.dataset.w[0] === 't' && $('wc' + i); if (el) { const c = wc(t.value); el.textContent = c + ' words'; el.classList.toggle('ok', c >= +el.dataset.target) } }
   else if (t.dataset.s) { const r = rec(n).S = rec(n).S || {}; r[t.dataset.s] = t.value; save() }
 });
@@ -543,18 +748,21 @@ root.addEventListener('change', async e => {
   else if (t.id === 'plBookIn') { const st = $('plBookSt'); st.className = 'status wait'; st.textContent = 'Saving…'; const { kept, temp } = await bookAdd([...t.files]); t.value = ''; st.className = 'status ' + (temp ? '' : 'ok'); st.textContent = temp ? `${kept} saved. ${temp} too large to keep in this browser: available until you close the page.` : `${kept} file${kept === 1 ? '' : 's'} saved on this device.`; renderBooks() }
   else if (t.id === 'plRestore') { const st = $('plSetupSt'); try { const j = JSON.parse(await t.files[0].text()); if (!j || j.app !== 'ielts-studio-plan' || !j.plan || !j.plan.start) throw 0; P = j.plan; P.days = P.days || {}; save(); render() } catch (err) { st.className = 'status err'; st.textContent = 'That file is not an IELTS Studio plan backup.' } }
   else if (t.id === 'liveModel') store.set('liveModel', t.value.trim());
+  else if (t.id === 'plPackDir' || t.id === 'plPackIn') { const st = $('plPackSt'); st.className = 'status wait'; st.textContent = 'Saving the test packs on this device…'; try { const got = await importPacks(t.files); st.className = 'status ok'; st.textContent = `Added: ${got.join(', ')}.`; t.value = ''; setTimeout(() => fillPacks(view.name === 'day' ? view.n : clampDay(todayN())).then(() => { const s2 = $('plPackSt'); if (s2) { s2.className = 'status ok'; s2.textContent = `Added: ${got.join(', ')}.` } }), 50) } catch (err) { st.className = 'status err'; st.textContent = err.message; t.value = '' } }
 });
-root.addEventListener('toggle', e => { if (e.target.id === 'plBooksD') store.set('plBooksOpen', e.target.open) }, true);
+root.addEventListener('toggle', e => { const t = e.target; if (t.id === 'plBooksD') store.set('plBooksOpen', t.open); if (t.dataset && t.dataset.paper && t.open && sim) { const f = t.querySelector('iframe'); if (f && !f.srcdoc) f.srcdoc = paperDoc(sim.pk.html, SKILL_H[t.dataset.paper]) } }, true);
+window.addEventListener('beforeunload', e => { if (sim && sim.order && sim.i < sim.order.length && (sim.playing || sim.iv)) { e.preventDefault(); e.returnValue = '' } });
 
 window.Plan = {
   show(parts) {
-    const next = parts[1] === 'day' && P ? { name: 'day', n: clampDay(parseInt(parts[2], 10) || 1) } : parts[1] === 'reports' && P ? { name: 'reports', n: 0 } : { name: 'home', n: 0 };
-    const same = next.name === view.name && next.n === view.n;
+    const next = parts[1] === 'day' && P ? { name: 'day', n: clampDay(parseInt(parts[2], 10) || 1) } : parts[1] === 'sim' && P && parts[2] ? { name: 'sim', pack: decodeURIComponent(parts[2]), n: clampDay(parseInt(parts[3], 10) || todayN()) } : parts[1] === 'reports' && P ? { name: 'reports', n: 0 } : { name: 'home', n: 0 };
+    const same = next.name === view.name && next.n === view.n && next.pack === view.pack;
+    if (same && next.name === 'sim' && sim) return;
     view = next; render(); if (!same) window.scrollTo(0, 0);
   },
-  leave() { stopAllTimers(); liveStop(true); recAbort() },
+  leave() { stopAllTimers(); liveStop(true); recAbort(); simStop() },
   stat() { if (!P) return 'Set up your 30 days'; const done = Object.values(P.days).filter(d => d.report).length, t = todayN(); return t < 1 ? `Starts ${nice(dayDate(1))}` : `${t > 30 ? 'Finished' : 'Day ' + t} · ${done} reports` },
-  _test: { toMp3, buildReport, reportPDF, dayPlan }
+  _test: { toMp3, buildReport, reportPDF, dayPlan, nrm, qKind, importPacks, packList }
 };
 IS.route();
 })();

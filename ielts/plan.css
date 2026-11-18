@@ -68,3 +68,40 @@ details.pl-d[open]>summary{margin-bottom:10px}
   .pl-view iframe{height:60vh}
 }
 @media (prefers-reduced-motion:reduce){.pl-rec{animation:none}}
+
+/* exam simulator */
+body.plan-wide .wrap{max-width:1180px}
+.sim-bar{position:sticky;top:6px;z-index:5;padding:14px 18px;gap:10px}
+.sim-bar h2{font-size:20px}
+.sim-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,1fr);gap:16px;align-items:start}
+.sim-paper iframe{width:100%;height:calc(100vh - 200px);min-height:420px;border:1px solid var(--rule);border-radius:14px;background:#fff;display:block}
+.sim-sheet{max-height:calc(100vh - 200px);overflow:auto;display:flex;flex-direction:column;gap:12px;border-radius:14px}
+.sim-sheet>.sheet{padding:16px}
+.sim-ans{gap:8px}
+.sim-qs{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:6px 10px}
+.sim-q{display:grid;grid-template-columns:26px 1fr;gap:5px;align-items:center}
+.sim-q label{font:600 12.5px var(--f-mono);color:var(--muted);text-align:right}
+.sim-q input,.sim-q select{font:16px var(--f-body);color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:7px;padding:6px 8px;width:100%;min-width:0}
+.sim-tabs{display:none}
+.pl-clock.warn{color:var(--bad)}
+.pl-tag{font-style:normal;font:700 11px var(--f-mono);background:var(--marker);color:var(--marker-ink);padding:1px 6px;border-radius:4px}
+.sim-rev{display:grid;grid-template-columns:30px 1fr 1fr minmax(150px,1fr);gap:6px 10px;align-items:center;border-top:1px solid var(--rule);padding:7px 0;font-size:14.5px}
+.sim-rev select{font:13.5px var(--f-body);padding:5px 6px;width:100%}
+.sim-rev-paper{width:100%;height:70vh;border:1px solid var(--rule);border-radius:10px;background:#fff;margin-top:8px}
+@media (max-width:899px){
+  .sim-grid{grid-template-columns:1fr}
+  .sim-tabs{display:flex}
+  .sim-grid[data-show="paper"] .sim-sheet,.sim-grid[data-show="sheet"] .sim-paper{display:none}
+  .sim-paper iframe{height:calc(100vh - 250px)}
+  .sim-sheet{max-height:none;overflow:visible}
+  .sim-rev{grid-template-columns:30px 1fr}
+  .sim-rev>span:nth-of-type(2),.sim-rev select{grid-column:2}
+}
+.sim-bar .eyebrow{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:899px){
+  body.plan-wide header{display:none}
+  .sim-bar{padding:12px 14px;top:4px}
+  .sim-bar .row>div:first-child{flex:1 1 100%!important}
+  .sim-bar .row{gap:8px}
+  .sim-bar #simNext{margin-left:auto}
+}
